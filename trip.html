@@ -155,14 +155,57 @@
     text-decoration:none;
     border:1px solid currentColor;
     color:inherit;
+    background:none;
+    appearance:none;
+    -webkit-appearance:none;
+    font-family:inherit;
     font-size:9.5px;
     font-weight:600;
     letter-spacing:.03em;
     text-transform:uppercase;
     opacity:.85;
-    transition:transform .15s ease, opacity .15s ease;
+    cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease, background .15s ease, color .15s ease;
   }
   .word-link:active{ transform:scale(0.94); opacity:1; }
+  .word-link.selected{
+    background:var(--text);
+    color:var(--bg);
+    border-color:var(--text);
+    opacity:1;
+  }
+
+  /* ---- Words panel ---- */
+  .words-legend{
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    font-size:12px;
+    line-height:1.6;
+  }
+  .words-legend b{ font-family:'Fraunces', serif; font-weight:600; }
+  .words-legend .rules{ margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+  .words-ro .words-legend{ background:var(--rust-dim); color:var(--rust-text); }
+  .words-bg .words-legend{ background:var(--gold-dim); color:var(--gold-text); }
+  .words-ro .block-label{ color:var(--rust); }
+  .words-bg .block-label{ color:var(--gold); }
+
+  .prow{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    padding:7px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .prow:last-child{ border-bottom:none; }
+  .prow .pen{ font-size:12.5px; color:var(--text-dim); flex-shrink:0; width:40%; padding-top:2px; }
+  .prow .pnative{ text-align:right; }
+  .prow .plat, .prow .pcyr{ font-family:'Fraunces', serif; font-size:15px; font-weight:500; }
+  .prow .ptranslit{ font-size:11px; color:var(--text-faint); font-style:italic; margin-top:2px; }
+  .words-ro .ptranslit b, .words-bg .ptranslit b{ font-style:normal; }
+  .words-ro .ptranslit b{ color:var(--rust); }
+  .words-bg .ptranslit b{ color:var(--gold); }
 
   /* ---- Week grid (calendar) ---- */
   .weeklabels{
@@ -472,11 +515,11 @@
   <div class="timeline">
     <div class="seg buc">
       <span>BUCHAREST</span>
-      <a class="word-link" id="linkRomanian" href="romanian.html" target="_blank" rel="noopener">Words</a>
+      <button class="word-link" id="linkRomanian" type="button" onclick="selectWords('ro')">Words</button>
     </div>
     <div class="seg sof">
       <span>SOFIA</span>
-      <a class="word-link" id="linkBulgarian" href="bulgarian.html" target="_blank" rel="noopener">Words</a>
+      <button class="word-link" id="linkBulgarian" type="button" onclick="selectWords('bg')">Words</button>
     </div>
   </div>
   <div class="timeline-labels">
@@ -676,23 +719,194 @@ const days = [
   }
 ];
 
+const romanianCategories = [
+  {title:"Essentials", rows:[
+    ["Hello (formal)","Bună ziua"],
+    ["Hi (informal)","Salut"],
+    ["Good evening","Bună seara"],
+    ["Goodbye","La revedere"],
+    ["Please","Vă rog"],
+    ["Thank you","Mulțumesc"],
+    ["You're welcome","Cu plăcere"],
+    ["Yes / No","Da / Nu"],
+    ["Excuse me / Sorry","Scuzați-mă"],
+    ["Do you speak English?","Vorbiți engleza?"],
+    ["I don't understand","Nu înțeleg"]
+  ]},
+  {title:"Numbers", rows:[
+    ["1 / 2 / 3","unu / doi / trei"],
+    ["4 / 5 / 6","patru / cinci / șase"],
+    ["7 / 8 / 9","șapte / opt / nouă"],
+    ["10 / 20 / 100","zece / douăzeci / o sută"]
+  ]},
+  {title:"Directions", rows:[
+    ["Where is...?","Unde este...?"],
+    ["How do I get to...?","Cum ajung la...?"],
+    ["Left / Right","Stânga / Dreapta"],
+    ["Straight ahead","Drept înainte"],
+    ["Near / Far","Aproape / Departe"]
+  ]},
+  {title:"Hotel", rows:[
+    ["I have a reservation","Am o rezervare"],
+    ["Room / Key","Cameră / Cheie"],
+    ["Is breakfast included?","Micul dejun este inclus?"],
+    ["What time is check-out?","La ce oră eliberăm camera?"]
+  ]},
+  {title:"Transport", rows:[
+    ["Airport / Train station","Aeroport / Gara"],
+    ["Bus station / stop","Autogara / Stație"],
+    ["Ticket / One to...","Bilet / Un bilet până la..."],
+    ["Where can I buy a ticket?","De unde cumpăr un bilet?"]
+  ]},
+  {title:"Restaurant", rows:[
+    ["Table for two","O masă pentru doi"],
+    ["Menu / Water","Meniu / Apă"],
+    ["The bill, please","Nota de plată, vă rog"],
+    ["I'm vegetarian","Sunt vegetarian(ă)"],
+    ["Cheers!","Noroc!"]
+  ]},
+  {title:"Money & shopping", rows:[
+    ["How much is this?","Cât costă?"],
+    ["Too expensive","Prea scump"],
+    ["Can I pay by card?","Pot plăti cu cardul?"]
+  ]},
+  {title:"Emergency", rows:[
+    ["Help!","Ajutor!"],
+    ["I need a doctor","Am nevoie de un doctor"],
+    ["Call the police","Chemați poliția"],
+    ["Emergency number","112"]
+  ]}
+];
+
+const bulgarianCategories = [
+  {title:"Essentials", rows:[
+    ["Hello (formal)","Здравейте","<b>ZDRA</b>-vey-te"],
+    ["Hi (informal)","Здрасти","<b>ZDRAS</b>-ti"],
+    ["Good morning","Добро утро","do-<b>BRO OO</b>-tro"],
+    ["Good evening","Добър вечер","<b>DO</b>-bar <b>VE</b>-cher"],
+    ["Goodbye","Довиждане","do-<b>VIZH</b>-da-ne"],
+    ["Please","Моля","<b>MO</b>-lya"],
+    ["Thank you","Благодаря","bla-go-da-<b>RYA</b>"],
+    ["Yes / No","Да / Не","da / ne"],
+    ["Excuse me / Sorry","Извинете","iz-vi-<b>NE</b>-te"],
+    ["Do you speak English?","Говорите ли английски?","go-<b>VO</b>-ri-te li an-<b>GLIY</b>-ski"],
+    ["I don't understand","Не разбирам","ne raz-<b>BI</b>-ram"]
+  ]},
+  {title:"Numbers", rows:[
+    ["1 / 2 / 3","едно / две / три","ed-<b>NO</b> / dve / tri"],
+    ["4 / 5 / 6","четири / пет / шест","<b>CHE</b>-ti-ri / pet / shest"],
+    ["7 / 8 / 9","седем / осем / девет","<b>SE</b>-dem / <b>O</b>-sem / <b>DE</b>-vet"],
+    ["10 / 20 / 100","десет / двадесет / сто","<b>DE</b>-set / <b>DVA</b>-de-set / sto"]
+  ]},
+  {title:"Directions", rows:[
+    ["Where is...?","Къде е...?","ka-<b>DE</b> e..."],
+    ["Left / Right","Ляво / Дясно","<b>LYA</b>-vo / <b>DYAS</b>-no"],
+    ["Straight ahead","Направо","na-<b>PRA</b>-vo"],
+    ["Near / Far","Близо / Далеч","<b>BLI</b>-zo / da-<b>LECH</b>"]
+  ]},
+  {title:"Hotel", rows:[
+    ["Reservation","Резервация","re-zer-<b>VA</b>-tsi-ya"],
+    ["Room / Key","Стая / Ключ","<b>STA</b>-ya / klyuch"],
+    ["Is breakfast included?","Закуската включена ли е?","za-<b>KOOS</b>-ka-ta vklyu-<b>CHE</b>-na li e"],
+    ["What time is check-out?","В колко часа е напускането?","v <b>KOL</b>-ko cha-<b>SA</b> e na-<b>POOS</b>-ka-ne-to"]
+  ]},
+  {title:"Transport", rows:[
+    ["Airport / Train station","Летище / Гара","le-<b>TISH</b>-te / <b>GA</b>-ra"],
+    ["Bus station","Автогара","av-to-<b>GA</b>-ra"],
+    ["Ticket / One to...","Билет / Един билет до...","bi-<b>LET</b> / e-<b>DIN</b> bi-<b>LET</b> do..."],
+    ["Taxi","Такси","tak-<b>SI</b>"]
+  ]},
+  {title:"Restaurant", rows:[
+    ["Table for two","Маса за двама","<b>MA</b>-sa za <b>DVA</b>-ma"],
+    ["Menu / Water","Меню / Вода","me-<b>NYU</b> / vo-<b>DA</b>"],
+    ["The bill, please","Сметката, моля","<b>SMET</b>-ka-ta <b>MO</b>-lya"],
+    ["I'm vegetarian","Вегетарианец съм","ve-ge-ta-ri-<b>A</b>-nets sam"],
+    ["Cheers!","Наздраве!","naz-<b>DRA</b>-ve"]
+  ]},
+  {title:"Money & shopping", rows:[
+    ["How much is this?","Колко струва?","<b>KOL</b>-ko <b>STROO</b>-va"],
+    ["Too expensive","Твърде скъпо","<b>TVAR</b>-de <b>SKA</b>-po"],
+    ["Can I pay by card?","Мога ли да платя с карта?","<b>MO</b>-ga li da pla-<b>TYA</b> s <b>KAR</b>-ta"]
+  ]},
+  {title:"Emergency", rows:[
+    ["Help!","Помощ!","<b>PO</b>-mosht"],
+    ["I need a doctor","Трябва ми лекар","<b>TRYAB</b>-va mi <b>LE</b>-kar"],
+    ["Police","Полиция","po-<b>LI</b>-tsi-ya"],
+    ["Emergency number","112","same as UK/EU"]
+  ]}
+];
+
+const romanianLegend = `<b>How to read it</b> — Romanian is spelled the way it sounds, once you know five letters:
+  <div class="rules">
+    <span><b>ă</b> = "a" in "about"</span>
+    <span><b>â / î</b> = flat "uh"</span>
+    <span><b>ș</b> = "sh"</span>
+    <span><b>ț</b> = "ts"</span>
+    <span><b>ce/ci</b> = "che/chi"</span>
+    <span><b>ghe/ghi</b> = hard "ge/gi"</span>
+  </div>`;
+
+const bulgarianLegend = `<b>How to read it</b> — the transliteration is the important bit, since you can't sound out Cyrillic on sight. Stress is marked in CAPS.
+  <div class="rules">
+    <span><b>х</b> = "ch" (loch)</span>
+    <span><b>ъ</b> = flat "uh"</span>
+    <span><b>ж</b> = "zh" (measure)</span>
+    <span><b>ш</b> = "sh"</span>
+  </div>`;
+
+function renderRomanian(){
+  let html = `<div class="detail-date">PHRASEBOOK</div><div class="detail-title">Romanian</div><div class="words-ro">`;
+  html += `<div class="words-legend">${romanianLegend}</div>`;
+  romanianCategories.forEach(cat => {
+    html += `<div class="block"><div class="block-label">${cat.title}</div>`;
+    cat.rows.forEach(r => {
+      html += `<div class="prow"><div class="pen">${r[0]}</div><div class="pnative"><div class="plat">${r[1]}</div></div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderBulgarian(){
+  let html = `<div class="detail-date">PHRASEBOOK</div><div class="detail-title">Bulgarian</div><div class="words-bg">`;
+  html += `<div class="words-legend">${bulgarianLegend}</div>`;
+  bulgarianCategories.forEach(cat => {
+    html += `<div class="block"><div class="block-label">${cat.title}</div>`;
+    cat.rows.forEach(r => {
+      html += `<div class="prow"><div class="pen">${r[0]}</div><div class="pnative"><div class="pcyr">${r[1]}</div><div class="ptranslit">${r[2]}</div></div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
 const week = document.getElementById('week');
 const dayEls = [];
 days.forEach(d => {
   const el = document.createElement('div');
   el.className = `day ${d.city}${d.travel ? ' travel' : ''}`;
   el.innerHTML = `<div class="num">${d.num}</div><div class="mon">${d.month}</div><div class="dot"></div>`;
-  el.addEventListener('click', () => openDay(d.id));
+  el.addEventListener('click', () => selectDay(d.id));
   week.appendChild(el);
   dayEls.push(el);
 });
 
 const panel = document.getElementById('panel');
-let selectedId = null;
+const linkRomanian = document.getElementById('linkRomanian');
+const linkBulgarian = document.getElementById('linkBulgarian');
+let selected = {type:'day', id:0};
 
-function openDay(id){
-  selectedId = id;
-  dayEls.forEach((el, i) => el.classList.toggle('selected', i === id));
+function updateSelection(){
+  dayEls.forEach((el, i) => el.classList.toggle('selected', selected.type === 'day' && selected.id === i));
+  linkRomanian.classList.toggle('selected', selected.type === 'words' && selected.id === 'ro');
+  linkBulgarian.classList.toggle('selected', selected.type === 'words' && selected.id === 'bg');
+}
+
+function selectDay(id){
+  selected = {type:'day', id};
+  updateSelection();
 
   const d = days[id];
   const prev = days[id-1];
@@ -700,26 +914,24 @@ function openDay(id){
   panel.innerHTML = `
     ${d.render()}
     <div class="navrow">
-      <button class="navbtn ${prev ? '' : 'hidden'}" onclick="openDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
-      <button class="navbtn next ${next ? '' : 'hidden'}" onclick="openDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
+      <button class="navbtn ${prev ? '' : 'hidden'}" onclick="selectDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
+      <button class="navbtn next ${next ? '' : 'hidden'}" onclick="selectDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
     </div>
   `;
 }
 
-openDay(0);
-
-function syncWordLinks(){
-  const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-  document.getElementById('linkRomanian').href = `romanian.html?theme=${theme}`;
-  document.getElementById('linkBulgarian').href = `bulgarian.html?theme=${theme}`;
+function selectWords(lang){
+  selected = {type:'words', id:lang};
+  updateSelection();
+  panel.innerHTML = lang === 'ro' ? renderRomanian() : renderBulgarian();
 }
-syncWordLinks();
+
+selectDay(0);
 
 const themeToggle = document.getElementById('themeToggle');
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
-  syncWordLinks();
 });
 </script>
 
