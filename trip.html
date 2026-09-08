@@ -25,6 +25,12 @@
     --text-faint:#5E6B75;
     --toggle-bg:#262F37;
     --toggle-icon:#D4A64C;
+    --flight-bg:#182430;
+    --flight-border:#3E6E93;
+    --flight-icon:#7FB2DA;
+    --hotel-bg:#241D14;
+    --hotel-border:#8A6A2E;
+    --hotel-icon:#D9B15C;
     color-scheme: dark;
   }
 
@@ -46,6 +52,12 @@
     --text-faint:#A2988A;
     --toggle-bg:#FFFFFF;
     --toggle-icon:#A9791F;
+    --flight-bg:#EAF2F8;
+    --flight-border:#7FA9C8;
+    --flight-icon:#3E6E93;
+    --hotel-bg:#FBF2DF;
+    --hotel-border:#D9B15C;
+    --hotel-icon:#8A6A2E;
     color-scheme: light;
   }
 
@@ -256,6 +268,16 @@
     letter-spacing:.06em;
     margin-bottom:10px;
   }
+  .block--flight{
+    background:var(--flight-bg);
+    border-color:var(--flight-border);
+  }
+  .block--flight .block-label{ color:var(--flight-icon); }
+  .block--hotel{
+    background:var(--hotel-bg);
+    border-color:var(--hotel-border);
+  }
+  .block--hotel .block-label{ color:var(--hotel-icon); }
   .route{
     display:flex;
     align-items:center;
@@ -293,7 +315,7 @@
     position:absolute;
     left:50%;top:50%;
     transform:translate(-50%,-50%);
-    background:var(--surface);
+    background:var(--flight-bg);
     padding:0 6px;
     font-size:12px;
   }
@@ -467,7 +489,7 @@ const days = [
       <div class="detail-title">London → Bucharest</div>
       <span class="badge buc">ARRIVAL DAY · BUCHAREST</span>
 
-      <div class="block">
+      <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
           <div class="pt"><div class="code">LHR</div><div class="time">09:50</div></div>
@@ -477,7 +499,7 @@ const days = [
         <div class="meta-row"><span>British Airways</span><span>Ref: YCLF6E</span></div>
       </div>
 
-      <div class="block">
+      <div class="block block--hotel">
         <div class="block-label">Stay</div>
         <div class="hotel-name">Hotel Berthelot</div>
         <div class="addr">Bulevardul Berthelot 9, Sector 1, Bucharest</div>
@@ -550,7 +572,7 @@ const days = [
         <div class="plan"><div class="when">~15:30</div><div class="what"><strong>Head to the airport</strong><p>Allow time for the 20km transfer plus check-in for an 18:15 departure.</p></div></div>
       </div>
 
-      <div class="block">
+      <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
           <div class="pt"><div class="code">OTP</div><div class="time">18:15</div></div>
@@ -560,7 +582,7 @@ const days = [
         <div class="meta-row"><span>Tarom · Economy</span><span></span></div>
       </div>
 
-      <div class="block">
+      <div class="block block--hotel">
         <div class="block-label">Stay</div>
         <div class="hotel-name">Hotel Anel ★★★★★</div>
         <div class="addr">14 Todor Alexandrov Bul., Sofia 1303</div>
@@ -624,7 +646,7 @@ const days = [
         <div class="plan"><div class="when">~17:00</div><div class="what"><strong>Head to the airport</strong><p>Plenty of margin for a 19:45 departure — metro from Serdika takes ~20 min.</p></div></div>
       </div>
 
-      <div class="block">
+      <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
           <div class="pt"><div class="code">SOF</div><div class="time">19:45</div></div>
