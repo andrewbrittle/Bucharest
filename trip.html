@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bucharest &amp; Sofia — 26 Oct to 1 Nov</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#14181C;
+    --surface:#1D242A;
+    --surface-hi:#262F37;
+    --line:#313B43;
+    --rust:#BE5F35;
+    --rust-dim:#5A3324;
+    --gold:#D4A64C;
+    --gold-dim:#5C4A26;
+    --text:#EDE7DA;
+    --text-dim:#93A0AA;
+    --text-faint:#5E6B75;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .app{
+    max-width:460px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+    position:relative;
+    min-height:100vh;
+  }
+
+  /* ---- Header ---- */
+  .eyebrow{
+    font-size:12.5px;
+    color:var(--text-dim);
+    letter-spacing:.02em;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:500;
+    font-size:32px;
+    line-height:1.12;
+    margin:0 0 4px;
+  }
+  h1 .and{
+    color:var(--text-faint);
+    font-style:italic;
+    font-weight:400;
+  }
+  .daterange{
+    color:var(--text-dim);
+    font-size:14.5px;
+    margin-bottom:26px;
+  }
+
+  /* ---- City timeline bar ---- */
+  .timeline{
+    display:flex;
+    height:40px;
+    border-radius:9px;
+    overflow:hidden;
+    margin-bottom:8px;
+  }
+  .timeline .seg{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.01em;
+  }
+  .timeline .buc{
+    flex:3;
+    background:var(--rust-dim);
+    color:#F0C4A8;
+    border-right:1px solid var(--bg);
+  }
+  .timeline .sof{
+    flex:3;
+    background:var(--gold-dim);
+    color:#F0D999;
+  }
+  .timeline-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--text-faint);
+    margin-bottom:30px;
+  }
+
+  /* ---- Week grid (calendar) ---- */
+  .weeklabels{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    font-size:10.5px;
+    color:var(--text-faint);
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .week{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    margin-bottom:36px;
+  }
+  .day{
+    aspect-ratio:1/1.18;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:6px 2px;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    position:relative;
+  }
+  .day:active{ transform:scale(0.94); }
+  .day:hover{ background:var(--surface-hi); }
+  .day .num{
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    font-weight:500;
+    line-height:1;
+  }
+  .day .mon{
+    font-size:9px;
+    color:var(--text-faint);
+    margin-top:2px;
+    letter-spacing:.03em;
+  }
+  .day .dot{
+    width:5px;height:5px;border-radius:50%;
+    margin-top:5px;
+  }
+  .day.buc{ border-color:#4A2E22; }
+  .day.buc .dot{ background:var(--rust); }
+  .day.sof{ border-color:#4A3D22; }
+  .day.sof .dot{ background:var(--gold); }
+  .day.travel{
+    background:linear-gradient(135deg, var(--rust-dim), var(--gold-dim));
+  }
+  .day.travel .num{ color:#fff; }
+
+  /* ---- Detail panel ---- */
+  .detail{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    transform:translateY(100%);
+    transition:transform .32s cubic-bezier(.32,.72,0,1);
+    overflow-y:auto;
+    z-index:10;
+  }
+  .detail.open{ transform:translateY(0); }
+  .detail-inner{
+    max-width:460px;
+    margin:0 auto;
+    padding:22px 20px 60px;
+  }
+  .back{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text-dim);
+    font-size:14px;
+    background:none;
+    border:none;
+    padding:8px 0 22px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .back:before{ content:"←"; font-size:15px; }
+  .back:active{ opacity:.6; }
+
+  .detail-date{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-bottom:4px;
+  }
+  .detail-title{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:28px;
+    margin:0 0 22px;
+    line-height:1.15;
+  }
+
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:22px;
+    letter-spacing:.02em;
+  }
+  .badge.buc{ background:var(--rust-dim); color:#F0C4A8; }
+  .badge.sof{ background:var(--gold-dim); color:#F0D999; }
+
+  .block{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:14px;
+  }
+  .block-label{
+    font-size:11px;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:10px;
+  }
+  .route{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .route .pt{ text-align:center; }
+  .route .pt .code{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    font-weight:500;
+  }
+  .route .pt .time{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+  .route .mid{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 12px;
+    color:var(--text-faint);
+  }
+  .route .mid .line{
+    width:100%;
+    height:1px;
+    background:var(--line);
+    position:relative;
+    margin:4px 0;
+  }
+  .route .mid .line:after{
+    content:"✈";
+    position:absolute;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    background:var(--surface);
+    padding:0 6px;
+    font-size:12px;
+  }
+  .route .mid .dur{ font-size:11px; }
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--text-dim);
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    margin-top:10px;
+  }
+
+  .hotel-name{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .addr{ font-size:13.5px; color:var(--text-dim); margin-bottom:10px; }
+  .hoursrow{
+    display:flex;
+    gap:20px;
+    font-size:13px;
+  }
+  .hoursrow div span{ display:block; color:var(--text-faint); font-size:11px; margin-bottom:2px;}
+
+  .tip{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--text);
+  }
+  .tip strong{ color:var(--gold); font-weight:600; }
+  .tip + .tip{ margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+
+  .open-day{
+    padding:30px 4px;
+    text-align:center;
+    color:var(--text-faint);
+    font-size:14px;
+    font-style:italic;
+    font-family:'Fraunces', serif;
+  }
+
+  .plan{
+    display:flex;
+    gap:14px;
+    padding:14px 0;
+  }
+  .plan:not(:last-child){ border-bottom:1px solid var(--line); }
+  .plan .when{
+    width:58px;
+    flex-shrink:0;
+    font-size:12px;
+    color:var(--text-faint);
+    padding-top:1px;
+  }
+  .plan .what strong{
+    display:block;
+    font-size:14.5px;
+    font-weight:600;
+    margin-bottom:3px;
+  }
+  .plan .what p{
+    margin:0;
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.5;
+  }
+  .plan .what .hours{
+    display:inline-block;
+    margin-top:6px;
+    font-size:11.5px;
+    color:var(--gold);
+    font-style:italic;
+  }
+
+  .navrow{
+    display:flex;
+    justify-content:space-between;
+    margin-top:26px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+  }
+  .navbtn{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .navbtn.next{ text-align:right; align-items:flex-end; }
+  .navbtn span{ font-size:11px; color:var(--text-faint); }
+  .navbtn:active{ opacity:.6; }
+  .navbtn.hidden{ visibility:hidden; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="eyebrow">TRIP · 26 OCT – 1 NOV 2026</div>
+  <h1>Bucharest <span class="and">&amp;</span> Sofia</h1>
+  <div class="daterange">7 days · 2 cities · one flight between them</div>
+
+  <div class="timeline">
+    <div class="seg buc">BUCHAREST</div>
+    <div class="seg sof">SOFIA</div>
+  </div>
+  <div class="timeline-labels">
+    <span>26 Oct</span><span>29 Oct</span><span>1 Nov</span>
+  </div>
+
+  <div class="weeklabels">
+    <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+  </div>
+  <div class="week" id="week"></div>
+</div>
+
+<div class="detail" id="detail">
+  <div class="detail-inner" id="detail-inner"></div>
+</div>
+
+<script>
+const days = [
+  {
+    id:0, weekday:"Monday", date:"26 October", month:"OCT", num:26, city:"buc", travel:true,
+    title:"London → Bucharest",
+    render: () => `
+      <div class="detail-date">Monday, 26 October</div>
+      <div class="detail-title">London → Bucharest</div>
+      <span class="badge buc">ARRIVAL DAY · BUCHAREST</span>
+
+      <div class="block">
+        <div class="block-label">Flight</div>
+        <div class="route">
+          <div class="pt"><div class="code">LHR</div><div class="time">09:50</div></div>
+          <div class="mid"><div class="line"></div><div class="dur">3h 15m · direct</div></div>
+          <div class="pt"><div class="code">OTP</div><div class="time">15:05</div></div>
+        </div>
+        <div class="meta-row"><span>British Airways</span><span>Ref: YCLF6E</span></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Stay</div>
+        <div class="hotel-name">Hotel Berthelot</div>
+        <div class="addr">Bulevardul Berthelot 9, Sector 1, Bucharest</div>
+        <div class="hoursrow">
+          <div><span>Check-in</span>from 14:00</div>
+          <div><span>Check-out</span>until 12:00</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Airport → hotel</div>
+        <div class="tip"><strong>Taxi/Bolt</strong> is simplest after landing — order via the kiosks in Arrivals or the app. ~80–100 RON, 30–40 min.</div>
+        <div class="tip"><strong>Bus 783</strong> runs from right outside Arrivals to the centre (Piața Unirii), ~4.5 RON.</div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Suggested evening</div>
+        <div class="plan"><div class="when">Settle in</div><div class="what"><strong>Check in, freshen up</strong><p>You'll land mid-afternoon and be at the hotel by ~16:30 — no need to rush straight out.</p></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Old Town (Lipscani)</strong><p>Ten minutes' walk from the hotel. Wander the cobbled streets, pop into Stavropoleos Monastery if it's still open, and pick a restaurant for dinner — easy first night, nothing to plan ahead.</p></div></div>
+      </div>
+    `
+  },
+  {
+    id:1, weekday:"Tuesday", date:"27 October", month:"OCT", num:27, city:"buc", travel:false,
+    title:"Bucharest",
+    render: () => `
+      <div class="detail-date">Tuesday, 27 October</div>
+      <div class="detail-title">In Bucharest</div>
+      <span class="badge buc">BUCHAREST</span>
+
+      <div class="block">
+        <div class="block-label">Suggested day</div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Palace of the Parliament</strong><p>The must-see — second-largest administrative building in the world. Guided tours only; worth booking a slot in advance rather than turning up.</p><span class="hours">Open 9am–5pm daily</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Calea Victoriei</strong><p>Walk the grand boulevard from the Palace area up past the Romanian Athenaeum — good for lunch along the way.</p></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Herăstrău Park &amp; Village Museum</strong><p>A short taxi or metro ride north. The open-air museum of traditional Romanian houses is a nice change of pace, and the park itself is pleasant for a stroll by the lake.</p><span class="hours">Museum open 9am–5pm daily (winter hours by late Oct)</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Option: concert at the Athenaeum</strong><p>There's a concert at the Romanian Athenaeum on this evening at 7pm that could be worth it — since it lines up with the day you're already in the centre for the Palace of the Parliament and Calea Victoriei. Dinner could shift earlier or later around it.</p></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Dinner back in the centre</strong><p>Head back towards Old Town or Calea Victoriei for dinner. Worth keeping an ear out too — Bucharest's smaller churches occasionally host organ or chamber recitals of an evening, a nice low-key alternative to a big concert hall if you spot a poster on the way past.</p></div></div>
+      </div>
+    `
+  },
+  {
+    id:2, weekday:"Wednesday", date:"28 October", month:"OCT", num:28, city:"buc", travel:false,
+    title:"Bucharest",
+    render: () => `
+      <div class="detail-date">Wednesday, 28 October</div>
+      <div class="detail-title">In Bucharest</div>
+      <span class="badge buc">BUCHAREST</span>
+
+      <div class="block">
+        <div class="block-label">Suggested day</div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Romanian Athenaeum — visit the building</strong><p>Best in the morning, when there's no rehearsal or concert restricting access. Self-guided entry to the foyer and the main hall, with its huge fresco of Romanian history circling the walls — worth it for the interior alone, no concert required.</p><span class="hours">Open ~9:30am–5:30pm, small entry fee (~10 RON); access may be limited if a rehearsal is on</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Coffee in Old Town</strong><p>Maybe a browse through Cărturești Carusel, the six-storey bookshop housed in a restored 19th-century building nearby.</p><span class="hours">Cărturești Carusel open 10am–10pm Mon–Wed</span></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Curtea Veche &amp; Manuc's Inn</strong><p>Worth knowing before you go: the Old Princely Court ruins themselves have been closed to the public for restoration for some years, so it's an exterior stop — the courtyard and Vlad the Impaler bust are visible from the street. Manuc's Inn right next door is open as normal, with a lovely covered courtyard for coffee or a late lunch.</p><span class="hours">Manuc's Inn open 8am–midnight (till 2am Fri/Sat)</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Look for a concert in a smaller venue</strong><p>Rather than a big philharmonic night, Bucharest's churches often host organ or chamber recitals that are easy to stumble into — St. Joseph's Catholic Cathedral is literally on the same street as Hotel Berthelot, and the Anglican Church of the Resurrection runs an occasional recital series too. These aren't usually on the big ticketing sites — check posters at the door or local listings once you're there.</p></div></div>
+      </div>
+    `
+  },
+  {
+    id:3, weekday:"Thursday", date:"29 October", month:"OCT", num:29, city:"buc", travel:true,
+    title:"Bucharest → Sofia",
+    render: () => `
+      <div class="detail-date">Thursday, 29 October</div>
+      <div class="detail-title">Bucharest → Sofia</div>
+      <span class="badge buc">DEPARTURE DAY · BUCHAREST → SOFIA</span>
+
+      <div class="block">
+        <div class="block-label">Suggested morning</div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Check out by 12:00</strong><p>Leave bags with the hotel if they'll hold them — no need to lug them round.</p></div></div>
+        <div class="plan"><div class="when">Late morning</div><div class="what"><strong>Anything you missed</strong><p>A few hours free before heading to the airport — good for anything left on the list from Tue/Wed, or just a last coffee in Old Town.</p></div></div>
+        <div class="plan"><div class="when">~15:30</div><div class="what"><strong>Head to the airport</strong><p>Allow time for the 20km transfer plus check-in for an 18:15 departure.</p></div></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Flight</div>
+        <div class="route">
+          <div class="pt"><div class="code">OTP</div><div class="time">18:15</div></div>
+          <div class="mid"><div class="line"></div><div class="dur">1h 15m · direct</div></div>
+          <div class="pt"><div class="code">SOF</div><div class="time">19:30</div></div>
+        </div>
+        <div class="meta-row"><span>Tarom · Economy</span><span></span></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Stay</div>
+        <div class="hotel-name">Hotel Anel ★★★★★</div>
+        <div class="addr">14 Todor Alexandrov Bul., Sofia 1303</div>
+        <div class="hoursrow">
+          <div><span>Check-in</span>from 14:00</div>
+          <div><span>Check-out</span>until 12:00</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Airport → hotel</div>
+        <div class="tip">Landing at 19:30, after a full day of travel — <strong>taxi or Bolt</strong> straight to the door is the easy call. Official taxi (OK Supertrans) or Bolt, ~10–15 BGN (€5–8), 20–25 min.</div>
+        <div class="tip">Metro Line 1/2 also runs to Serdika until midnight (1.60 BGN) if you'd rather save the walk from there is short.</div>
+      </div>
+    `
+  },
+  {
+    id:4, weekday:"Friday", date:"30 October", month:"OCT", num:30, city:"sof", travel:false,
+    title:"Sofia",
+    render: () => `
+      <div class="detail-date">Friday, 30 October</div>
+      <div class="detail-title">In Sofia</div>
+      <span class="badge sof">SOFIA</span>
+
+      <div class="block">
+        <div class="block-label">Suggested day</div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Alexander Nevsky Cathedral</strong><p>Sofia's centrepiece — the gold-domed cathedral. Go early before the tour groups; the antique market along the square outside is worth a browse too.</p><span class="hours">Cathedral open 7am–7pm daily, free entry</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Ancient Serdica ruins</strong><p>Roman remains sitting right in the modern city centre, near Serdika metro station — an easy, short stop on the way to lunch.</p><span class="hours">Open access during metro hours (~6am–11pm), free</span></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Vitosha Boulevard</strong><p>The main pedestrian street for shops, cafés, and people-watching — a relaxed way to fill the afternoon.</p></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Dinner near Vitosha Boulevard</strong><p>Plenty of options right along the street or just off it. Sofia's churches — Sveta Nedelya Cathedral or the small St. George Rotunda among them — sometimes host organ or chamber recitals in the evening too; these tend to be advertised locally (posters at the door, programata.bg) rather than on the big ticketing sites, so worth a look once you're there.</p></div></div>
+      </div>
+    `
+  },
+  {
+    id:5, weekday:"Saturday", date:"31 October", month:"OCT", num:31, city:"sof", travel:false,
+    title:"Sofia",
+    render: () => `
+      <div class="detail-date">Saturday, 31 October</div>
+      <div class="detail-title">In Sofia</div>
+      <span class="badge sof">SOFIA</span>
+
+      <div class="block">
+        <div class="block-label">Suggested day</div>
+        <div class="plan"><div class="when">Day trip</div><div class="what"><strong>Vitosha Mountain</strong><p>Right on Sofia's doorstep — worth the whole day if the weather's clear. Bus/gondola up for hiking trails and views back over the city; a good change of pace from museums and streets. Lucky timing: outside ski season the Simeonovo–Aleko cable car and chairlifts only run on Saturdays and Sundays, and this trip lands on a Saturday.</p><span class="hours">Cable car/chairlifts typically run ~9am–4:30pm, weekends only outside ski season</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Spa at Hotel Anel</strong><p>Good timing after a day on the mountain — build in proper time to actually use it rather than rushing straight to dinner.</p></div></div>
+      </div>
+    `
+  },
+  {
+    id:6, weekday:"Sunday", date:"1 November", month:"NOV", num:1, city:"sof", travel:true,
+    title:"Sofia → London",
+    render: () => `
+      <div class="detail-date">Sunday, 1 November</div>
+      <div class="detail-title">Sofia → London</div>
+      <span class="badge sof">DEPARTURE DAY · HOME</span>
+
+      <div class="block">
+        <div class="block-label">Suggested day</div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Check out by 12:00</strong><p>Ask the hotel to hold bags for the day — the airport transfer is quick, so no rush to keep them with you.</p></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Anything you missed</strong><p>A full afternoon free — good for whatever didn't fit earlier in the week, or just a last wander down Vitosha Boulevard.</p></div></div>
+        <div class="plan"><div class="when">~17:00</div><div class="what"><strong>Head to the airport</strong><p>Plenty of margin for a 19:45 departure — metro from Serdika takes ~20 min.</p></div></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Flight</div>
+        <div class="route">
+          <div class="pt"><div class="code">SOF</div><div class="time">19:45</div></div>
+          <div class="mid"><div class="line"></div><div class="dur">3h 25m · direct</div></div>
+          <div class="pt"><div class="code">LHR</div><div class="time">21:10</div></div>
+        </div>
+        <div class="meta-row"><span>British Airways</span><span>Ref: ZJV578</span></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">Hotel → airport</div>
+        <div class="tip">Metro Line 1/2 from Serdika to the airport takes ~20 min, 1.60 BGN — easy with the whole afternoon free. Taxi/Bolt is ~10–15 BGN if you'd rather not carry bags on the metro.</div>
+      </div>
+    `
+  }
+];
+
+const week = document.getElementById('week');
+days.forEach(d => {
+  const el = document.createElement('div');
+  el.className = `day ${d.city}${d.travel ? ' travel' : ''}`;
+  el.innerHTML = `<div class="num">${d.num}</div><div class="mon">${d.month}</div><div class="dot"></div>`;
+  el.addEventListener('click', () => openDay(d.id));
+  week.appendChild(el);
+});
+
+const detail = document.getElementById('detail');
+const detailInner = document.getElementById('detail-inner');
+
+function openDay(id){
+  const d = days[id];
+  const prev = days[id-1];
+  const next = days[id+1];
+  detailInner.innerHTML = `
+    <button class="back" onclick="closeDay()">Calendar</button>
+    ${d.render()}
+    <div class="navrow">
+      <button class="navbtn ${prev ? '' : 'hidden'}" onclick="openDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
+      <button class="navbtn next ${next ? '' : 'hidden'}" onclick="openDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
+    </div>
+  `;
+  detail.classList.add('open');
+  detail.scrollTop = 0;
+}
+function closeDay(){
+  detail.classList.remove('open');
+}
+</script>
+
+</body>
+</html>
