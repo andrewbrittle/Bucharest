@@ -138,8 +138,40 @@
     justify-content:space-between;
     font-size:11.5px;
     color:var(--text-faint);
+    margin-bottom:16px;
+  }
+
+  .word-links{
+    display:flex;
+    gap:10px;
     margin-bottom:30px;
   }
+  .word-link{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1px;
+    padding:11px 8px;
+    border-radius:10px;
+    text-decoration:none;
+    border:1px solid;
+    transition:transform .15s ease;
+  }
+  .word-link:active{ transform:scale(0.96); }
+  .word-link .native{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+  }
+  .word-link .cap{
+    font-size:10px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    opacity:.8;
+  }
+  .word-link.buc{ background:var(--rust-dim); border-color:var(--rust-border); color:var(--rust-text); }
+  .word-link.sof{ background:var(--gold-dim); border-color:var(--gold-border); color:var(--gold-text); }
 
   /* ---- Week grid (calendar) ---- */
   .weeklabels{
@@ -469,6 +501,17 @@
     <span>26 Oct</span><span>29 Oct</span><span>1 Nov</span>
   </div>
 
+  <div class="word-links">
+    <a class="word-link buc" href="romanian.html" target="_blank" rel="noopener">
+      <span class="native">Cuvinte</span>
+      <span class="cap">Romanian words</span>
+    </a>
+    <a class="word-link sof" href="bulgarian.html" target="_blank" rel="noopener">
+      <span class="native">Думи</span>
+      <span class="cap">Bulgarian words</span>
+    </a>
+  </div>
+
   <div class="weeklabels">
     <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
   </div>
@@ -594,8 +637,8 @@ const days = [
 
       <div class="block">
         <div class="block-label">Airport → hotel</div>
-        <div class="tip">Landing at 19:30, after a full day of travel — <strong>taxi or Bolt</strong> straight to the door is the easy call. Official taxi (OK Supertrans) or Bolt, ~10–15 BGN (€5–8), 20–25 min.</div>
-        <div class="tip">Metro Line 1/2 also runs to Serdika until midnight (1.60 BGN) if you'd rather save the walk from there is short.</div>
+        <div class="tip">Landing at 19:30, after a full day of travel — <strong>taxi or Bolt</strong> straight to the door is the easy call. Bulgaria's on the euro now (since Jan 2026), so it's official taxi (OK Supertrans) or Bolt, ~€5–8, 20–25 min.</div>
+        <div class="tip">Metro Line 1/2 also runs to Serdika until midnight (€0.80) if you'd rather save the walk from there is short.</div>
       </div>
     `
   },
@@ -658,7 +701,7 @@ const days = [
 
       <div class="block">
         <div class="block-label">Hotel → airport</div>
-        <div class="tip">Metro Line 1/2 from Serdika to the airport takes ~20 min, 1.60 BGN — easy with the whole afternoon free. Taxi/Bolt is ~10–15 BGN if you'd rather not carry bags on the metro.</div>
+        <div class="tip">Metro Line 1/2 from Serdika to the airport takes ~20 min, €0.80 — easy with the whole afternoon free. Taxi/Bolt is ~€5–8 if you'd rather not carry bags on the metro.</div>
       </div>
     `
   }
