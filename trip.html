@@ -14,12 +14,42 @@
     --line:#313B43;
     --rust:#BE5F35;
     --rust-dim:#5A3324;
+    --rust-text:#F0C4A8;
+    --rust-border:#4A2E22;
     --gold:#D4A64C;
     --gold-dim:#5C4A26;
+    --gold-text:#F0D999;
+    --gold-border:#4A3D22;
     --text:#EDE7DA;
     --text-dim:#93A0AA;
     --text-faint:#5E6B75;
+    --toggle-bg:#262F37;
+    --toggle-icon:#D4A64C;
+    color-scheme: dark;
   }
+
+  html[data-theme="light"]{
+    --bg:#F6F1E6;
+    --surface:#FFFFFF;
+    --surface-hi:#F1EADC;
+    --line:#E3D9C6;
+    --rust:#A8501F;
+    --rust-dim:#F1DAC3;
+    --rust-text:#8C3E17;
+    --rust-border:#E3C6A8;
+    --gold:#A9791F;
+    --gold-dim:#F3E6BE;
+    --gold-text:#7A5813;
+    --gold-border:#E3CE8F;
+    --text:#2B241C;
+    --text-dim:#6E6255;
+    --text-faint:#A2988A;
+    --toggle-bg:#FFFFFF;
+    --toggle-icon:#A9791F;
+    color-scheme: light;
+  }
+
+  body{ transition: background .25s ease, color .25s ease; }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -83,13 +113,13 @@
   .timeline .buc{
     flex:3;
     background:var(--rust-dim);
-    color:#F0C4A8;
+    color:var(--rust-text);
     border-right:1px solid var(--bg);
   }
   .timeline .sof{
     flex:3;
     background:var(--gold-dim);
-    color:#F0D999;
+    color:var(--gold-text);
   }
   .timeline-labels{
     display:flex;
@@ -147,9 +177,9 @@
     width:5px;height:5px;border-radius:50%;
     margin-top:5px;
   }
-  .day.buc{ border-color:#4A2E22; }
+  .day.buc{ border-color:var(--rust-border); }
   .day.buc .dot{ background:var(--rust); }
-  .day.sof{ border-color:#4A3D22; }
+  .day.sof{ border-color:var(--gold-border); }
   .day.sof .dot{ background:var(--gold); }
   .day.travel{
     background:linear-gradient(135deg, var(--rust-dim), var(--gold-dim));
@@ -209,8 +239,8 @@
     margin-bottom:22px;
     letter-spacing:.02em;
   }
-  .badge.buc{ background:var(--rust-dim); color:#F0C4A8; }
-  .badge.sof{ background:var(--gold-dim); color:#F0D999; }
+  .badge.buc{ background:var(--rust-dim); color:var(--rust-text); }
+  .badge.sof{ background:var(--gold-dim); color:var(--gold-text); }
 
   .block{
     background:var(--surface);
@@ -364,9 +394,45 @@
   .navbtn span{ font-size:11px; color:var(--text-faint); }
   .navbtn:active{ opacity:.6; }
   .navbtn.hidden{ visibility:hidden; }
+
+  /* ---- Theme toggle ---- */
+  .theme-toggle{
+    position:fixed;
+    top:22px;
+    right:20px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:var(--toggle-bg);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:20;
+    transition:background .25s ease, border-color .25s ease, transform .15s ease;
+  }
+  .theme-toggle:active{ transform:scale(0.92); }
+  .theme-toggle svg{
+    width:18px;
+    height:18px;
+    stroke:var(--toggle-icon);
+    fill:none;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .theme-toggle .icon-sun{ display:none; }
+  html[data-theme="light"] .theme-toggle .icon-moon{ display:none; }
+  html[data-theme="light"] .theme-toggle .icon-sun{ display:block; }
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
 
 <div class="app">
   <div class="eyebrow">TRIP · 26 OCT – 1 NOV 2026</div>
@@ -606,6 +672,12 @@ function openDay(id){
 function closeDay(){
   detail.classList.remove('open');
 }
+
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+});
 </script>
 
 </body>
