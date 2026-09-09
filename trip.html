@@ -26,17 +26,17 @@
     --gold-dim:#5C4A26;
     --gold-text:#F0D999;
     --gold-border:#4A3D22;
-    --text:#EDE7DA;
-    --text-dim:#93A0AA;
-    --text-faint:#5E6B75;
+    --text:#F3EEE3;
+    --text-dim:#A3AFB8;
+    --text-faint:#7C8A94;
     --toggle-bg:#262F37;
     --toggle-icon:#D4A64C;
-    --flight-bg:#182430;
-    --flight-border:#3E6E93;
-    --flight-icon:#7FB2DA;
+    --flight-bg:#132A20;
+    --flight-border:#3FA06B;
+    --flight-icon:#7FDDA5;
     --hotel-bg:#241D14;
-    --hotel-border:#8A6A2E;
-    --hotel-icon:#D9B15C;
+    --hotel-border:#B08838;
+    --hotel-icon:#E4BE6F;
     color-scheme: dark;
   }
 
@@ -53,17 +53,17 @@
     --gold-dim:#F3E6BE;
     --gold-text:#7A5813;
     --gold-border:#E3CE8F;
-    --text:#2B241C;
-    --text-dim:#6E6255;
-    --text-faint:#A2988A;
+    --text:#241F18;
+    --text-dim:#5C5042;
+    --text-faint:#7A6F60;
     --toggle-bg:#FFFFFF;
     --toggle-icon:#A9791F;
-    --flight-bg:#EAF2F8;
-    --flight-border:#7FA9C8;
-    --flight-icon:#3E6E93;
+    --flight-bg:#E3F3EA;
+    --flight-border:#2F7D4F;
+    --flight-icon:#1F6E45;
     --hotel-bg:#FBF2DF;
-    --hotel-border:#D9B15C;
-    --hotel-icon:#8A6A2E;
+    --hotel-border:#A9791F;
+    --hotel-icon:#7A5813;
     color-scheme: light;
   }
 
@@ -88,7 +88,7 @@
 
   /* ---- Header ---- */
   .eyebrow{
-    font-size:12.5px;
+    font-size:13.5px;
     color:var(--text-dim);
     letter-spacing:.02em;
     margin-bottom:6px;
@@ -108,7 +108,7 @@
   }
   .daterange{
     color:var(--text-dim);
-    font-size:14.5px;
+    font-size:15.5px;
     margin-bottom:26px;
   }
 
@@ -118,14 +118,14 @@
     height:40px;
     border-radius:9px;
     overflow:hidden;
-    margin-bottom:8px;
+    margin-bottom:16px;
   }
   .timeline .seg{
     display:flex;
     align-items:center;
     justify-content:space-between;
     padding:0 10px;
-    font-size:12.5px;
+    font-size:13px;
     font-weight:600;
     letter-spacing:.01em;
   }
@@ -139,13 +139,6 @@
     flex:3;
     background:var(--gold-dim);
     color:var(--gold-text);
-  }
-  .timeline-labels{
-    display:flex;
-    justify-content:space-between;
-    font-size:11.5px;
-    color:var(--text-faint);
-    margin-bottom:30px;
   }
 
   .word-link{
@@ -180,7 +173,7 @@
     border-radius:12px;
     padding:14px 16px;
     margin-bottom:14px;
-    font-size:12px;
+    font-size:13px;
     line-height:1.6;
   }
   .words-legend b{ font-family:'Fraunces', serif; font-weight:600; }
@@ -199,10 +192,10 @@
     border-bottom:1px solid var(--line);
   }
   .prow:last-child{ border-bottom:none; }
-  .prow .pen{ font-size:12.5px; color:var(--text-dim); flex-shrink:0; width:40%; padding-top:2px; }
+  .prow .pen{ font-size:13.5px; color:var(--text-dim); flex-shrink:0; width:40%; padding-top:2px; }
   .prow .pnative{ text-align:right; }
-  .prow .plat, .prow .pcyr{ font-family:'Fraunces', serif; font-size:15px; font-weight:500; }
-  .prow .ptranslit{ font-size:11px; color:var(--text-faint); font-style:italic; margin-top:2px; }
+  .prow .plat, .prow .pcyr{ font-family:'Fraunces', serif; font-size:16px; font-weight:500; }
+  .prow .ptranslit{ font-size:12px; color:var(--text-faint); font-style:italic; margin-top:2px; }
   .words-ro .ptranslit b, .words-bg .ptranslit b{ font-style:normal; }
   .words-ro .ptranslit b{ color:var(--rust); }
   .words-bg .ptranslit b{ color:var(--gold); }
@@ -212,8 +205,9 @@
     display:grid;
     grid-template-columns:repeat(7,1fr);
     gap:6px;
-    font-size:10.5px;
-    color:var(--text-faint);
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-dim);
     text-align:center;
     margin-bottom:8px;
   }
@@ -241,13 +235,14 @@
   .day:hover{ background:var(--surface-hi); }
   .day .num{
     font-family:'Fraunces', serif;
-    font-size:20px;
-    font-weight:500;
+    font-size:21px;
+    font-weight:600;
     line-height:1;
   }
   .day .mon{
-    font-size:9px;
-    color:var(--text-faint);
+    font-size:10px;
+    font-weight:600;
+    color:var(--text-dim);
     margin-top:2px;
     letter-spacing:.03em;
   }
@@ -281,7 +276,7 @@
   }
 
   .detail-date{
-    font-size:12.5px;
+    font-size:13.5px;
     color:var(--text-dim);
     margin-bottom:4px;
   }
@@ -295,7 +290,7 @@
 
   .badge{
     display:inline-block;
-    font-size:11px;
+    font-size:12px;
     font-weight:600;
     padding:4px 10px;
     border-radius:20px;
@@ -313,8 +308,8 @@
     margin-bottom:14px;
   }
   .block-label{
-    font-size:11px;
-    color:var(--text-faint);
+    font-size:11.5px;
+    color:var(--text-dim);
     text-transform:uppercase;
     letter-spacing:.06em;
     margin-bottom:10px;
@@ -342,9 +337,15 @@
     font-weight:500;
   }
   .route .pt .time{
-    font-size:13px;
+    font-size:14px;
     color:var(--text-dim);
     margin-top:2px;
+  }
+  .route .pt .tz{
+    font-size:10.5px;
+    color:var(--text-faint);
+    margin-top:1px;
+    letter-spacing:.02em;
   }
   .route .mid{
     flex:1;
@@ -368,13 +369,13 @@
     transform:translate(-50%,-50%);
     background:var(--flight-bg);
     padding:0 6px;
-    font-size:12px;
+    font-size:13px;
   }
-  .route .mid .dur{ font-size:11px; }
+  .route .mid .dur{ font-size:12px; }
   .meta-row{
     display:flex;
     justify-content:space-between;
-    font-size:13px;
+    font-size:14px;
     color:var(--text-dim);
     padding-top:10px;
     border-top:1px solid var(--line);
@@ -383,20 +384,20 @@
 
   .hotel-name{
     font-family:'Fraunces', serif;
-    font-size:19px;
+    font-size:20px;
     font-weight:500;
     margin-bottom:6px;
   }
-  .addr{ font-size:13.5px; color:var(--text-dim); margin-bottom:10px; }
+  .addr{ font-size:14.5px; color:var(--text-dim); margin-bottom:10px; }
   .hoursrow{
     display:flex;
     gap:20px;
-    font-size:13px;
+    font-size:14px;
   }
-  .hoursrow div span{ display:block; color:var(--text-faint); font-size:11px; margin-bottom:2px;}
+  .hoursrow div span{ display:block; color:var(--text-dim); font-size:11.5px; margin-bottom:2px;}
 
   .tip{
-    font-size:14px;
+    font-size:14.5px;
     line-height:1.55;
     color:var(--text);
   }
@@ -406,8 +407,8 @@
   .open-day{
     padding:30px 4px;
     text-align:center;
-    color:var(--text-faint);
-    font-size:14px;
+    color:var(--text-dim);
+    font-size:15px;
     font-style:italic;
     font-family:'Fraunces', serif;
   }
@@ -421,26 +422,26 @@
   .plan .when{
     width:58px;
     flex-shrink:0;
-    font-size:12px;
-    color:var(--text-faint);
+    font-size:13px;
+    color:var(--text-dim);
     padding-top:1px;
   }
   .plan .what strong{
     display:block;
-    font-size:14.5px;
+    font-size:15.5px;
     font-weight:600;
     margin-bottom:3px;
   }
   .plan .what p{
     margin:0;
-    font-size:13px;
+    font-size:14px;
     color:var(--text-dim);
     line-height:1.5;
   }
   .plan .what .hours{
     display:inline-block;
     margin-top:6px;
-    font-size:11.5px;
+    font-size:12.5px;
     color:var(--gold);
     font-style:italic;
   }
@@ -457,14 +458,14 @@
     border:none;
     color:var(--text-dim);
     font-family:'IBM Plex Sans', sans-serif;
-    font-size:13px;
+    font-size:14px;
     cursor:pointer;
     display:flex;
     flex-direction:column;
     gap:2px;
   }
   .navbtn.next{ text-align:right; align-items:flex-end; }
-  .navbtn span{ font-size:11px; color:var(--text-faint); }
+  .navbtn span{ font-size:12px; color:var(--text-dim); }
   .navbtn:active{ opacity:.6; }
   .navbtn.hidden{ visibility:hidden; }
 
@@ -522,9 +523,6 @@
       <button class="word-link" id="linkBulgarian" type="button" onclick="selectWords('bg')">Words</button>
     </div>
   </div>
-  <div class="timeline-labels">
-    <span>26 Oct</span><span>29 Oct</span><span>1 Nov</span>
-  </div>
 
   <div class="weeklabels">
     <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
@@ -547,11 +545,11 @@ const days = [
       <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
-          <div class="pt"><div class="code">LHR</div><div class="time">09:50</div></div>
+          <div class="pt"><div class="code">LHR</div><div class="time">09:50</div><div class="tz">GMT</div></div>
           <div class="mid"><div class="line"></div><div class="dur">3h 15m · direct</div></div>
-          <div class="pt"><div class="code">OTP</div><div class="time">15:05</div></div>
+          <div class="pt"><div class="code">OTP</div><div class="time">15:05</div><div class="tz">EET · UTC+2</div></div>
         </div>
-        <div class="meta-row"><span>British Airways</span><span>Ref: YCLF6E</span></div>
+        <div class="meta-row"><span>British Airways · BA874</span><span>Ref: YCLF6E</span></div>
       </div>
 
       <div class="block block--hotel">
@@ -630,11 +628,11 @@ const days = [
       <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
-          <div class="pt"><div class="code">OTP</div><div class="time">18:15</div></div>
+          <div class="pt"><div class="code">OTP</div><div class="time">18:15</div><div class="tz">EET · UTC+2</div></div>
           <div class="mid"><div class="line"></div><div class="dur">1h 15m · direct</div></div>
-          <div class="pt"><div class="code">SOF</div><div class="time">19:30</div></div>
+          <div class="pt"><div class="code">SOF</div><div class="time">19:30</div><div class="tz">EET · UTC+2</div></div>
         </div>
-        <div class="meta-row"><span>Tarom · Economy</span><span></span></div>
+        <div class="meta-row"><span>Tarom · RO297</span><span></span></div>
       </div>
 
       <div class="block block--hotel">
@@ -704,11 +702,11 @@ const days = [
       <div class="block block--flight">
         <div class="block-label">Flight</div>
         <div class="route">
-          <div class="pt"><div class="code">SOF</div><div class="time">19:45</div></div>
+          <div class="pt"><div class="code">SOF</div><div class="time">19:45</div><div class="tz">EET · UTC+2</div></div>
           <div class="mid"><div class="line"></div><div class="dur">3h 25m · direct</div></div>
-          <div class="pt"><div class="code">LHR</div><div class="time">21:10</div></div>
+          <div class="pt"><div class="code">LHR</div><div class="time">21:10</div><div class="tz">GMT</div></div>
         </div>
-        <div class="meta-row"><span>British Airways</span><span>Ref: ZJV578</span></div>
+        <div class="meta-row"><span>British Airways · BA893</span><span>Ref: ZJV578</span></div>
       </div>
 
       <div class="block">
