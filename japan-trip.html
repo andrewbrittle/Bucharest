@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan, Four Cities</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script>
+  (function(){
+    var m = location.search.match(/[?&]theme=(light|dark)/);
+    if (m) document.documentElement.setAttribute('data-theme', m[1]);
+  })();
+</script>
+<style>
+  :root{
+    --bg:#14181C;
+    --surface:#1D242A;
+    --surface-hi:#262F37;
+    --line:#313B43;
+    --text:#F3EEE3;
+    --text-dim:#A3AFB8;
+    --text-faint:#7C8A94;
+    --toggle-bg:#262F37;
+    --toggle-icon:#D4A64C;
+
+    --tok:#4A90C4; --tok-dim:#1B3247; --tok-text:#B7D9F0; --tok-border:#254257;
+    --kyo:#BE5F35; --kyo-dim:#5A3324; --kyo-text:#F0C4A8; --kyo-border:#4A2E22;
+    --tak:#5E9B5C; --tak-dim:#223A24; --tak-text:#BFE2BC; --tak-border:#2C4A2C;
+    --kan:#D4A64C; --kan-dim:#5C4A26; --kan-text:#F0D999; --kan-border:#4A3D22;
+
+    --transit-bg:#132A20; --transit-border:#3FA06B; --transit-icon:#7FDDA5;
+    --hotel-bg:#241D14; --hotel-border:#B08838; --hotel-icon:#E4BE6F;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F6F1E6; --surface:#FFFFFF; --surface-hi:#F1EADC; --line:#E3D9C6;
+      --text:#241F18; --text-dim:#5C5042; --text-faint:#7A6F60;
+      --toggle-bg:#FFFFFF; --toggle-icon:#A9791F;
+
+      --tok:#255E8C; --tok-dim:#DCEAF5; --tok-text:#17456B; --tok-border:#BEDAEC;
+      --kyo:#A8501F; --kyo-dim:#F1DAC3; --kyo-text:#8C3E17; --kyo-border:#E3C6A8;
+      --tak:#3F6B3D; --tak-dim:#DEEEDC; --tak-text:#2C4A2A; --tak-border:#C3DFC0;
+      --kan:#A9791F; --kan-dim:#F3E6BE; --kan-text:#7A5813; --kan-border:#E3CE8F;
+
+      --transit-bg:#E3F3EA; --transit-border:#2F7D4F; --transit-icon:#1F6E45;
+      --hotel-bg:#FBF2DF; --hotel-border:#A9791F; --hotel-icon:#7A5813;
+      color-scheme: light;
+    }
+  }
+  html[data-theme="light"]{
+    --bg:#F6F1E6; --surface:#FFFFFF; --surface-hi:#F1EADC; --line:#E3D9C6;
+    --text:#241F18; --text-dim:#5C5042; --text-faint:#7A6F60;
+    --toggle-bg:#FFFFFF; --toggle-icon:#A9791F;
+
+    --tok:#255E8C; --tok-dim:#DCEAF5; --tok-text:#17456B; --tok-border:#BEDAEC;
+    --kyo:#A8501F; --kyo-dim:#F1DAC3; --kyo-text:#8C3E17; --kyo-border:#E3C6A8;
+    --tak:#3F6B3D; --tak-dim:#DEEEDC; --tak-text:#2C4A2A; --tak-border:#C3DFC0;
+    --kan:#A9791F; --kan-dim:#F3E6BE; --kan-text:#7A5813; --kan-border:#E3CE8F;
+
+    --transit-bg:#E3F3EA; --transit-border:#2F7D4F; --transit-icon:#1F6E45;
+    --hotel-bg:#FBF2DF; --hotel-border:#A9791F; --hotel-icon:#7A5813;
+    color-scheme: light;
+  }
+  html[data-theme="dark"]{
+    --bg:#14181C; --surface:#1D242A; --surface-hi:#262F37; --line:#313B43;
+    --text:#F3EEE3; --text-dim:#A3AFB8; --text-faint:#7C8A94;
+    --toggle-bg:#262F37; --toggle-icon:#D4A64C;
+
+    --tok:#4A90C4; --tok-dim:#1B3247; --tok-text:#B7D9F0; --tok-border:#254257;
+    --kyo:#BE5F35; --kyo-dim:#5A3324; --kyo-text:#F0C4A8; --kyo-border:#4A2E22;
+    --tak:#5E9B5C; --tak-dim:#223A24; --tak-text:#BFE2BC; --tak-border:#2C4A2C;
+    --kan:#D4A64C; --kan-dim:#5C4A26; --kan-text:#F0D999; --kan-border:#4A3D22;
+
+    --transit-bg:#132A20; --transit-border:#3FA06B; --transit-icon:#7FDDA5;
+    --hotel-bg:#241D14; --hotel-border:#B08838; --hotel-icon:#E4BE6F;
+    color-scheme: dark;
+  }
+
+  body{ transition: background .25s ease, color .25s ease; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .app{ max-width:460px; margin:0 auto; padding:28px 20px 60px; position:relative; min-height:100vh; }
+
+  .eyebrow{ font-size:13.5px; color:var(--text-dim); letter-spacing:.02em; margin-bottom:6px; }
+  h1{ font-family:'Fraunces', serif; font-optical-sizing:auto; font-weight:500; font-size:32px; line-height:1.12; margin:0 0 4px; text-wrap:balance; }
+  .daterange{ color:var(--text-dim); font-size:15.5px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+
+  .word-link{
+    display:inline-block; padding:4px 11px; border-radius:20px; text-decoration:none;
+    border:1px solid var(--text-faint); color:var(--text-dim); background:none; appearance:none;
+    font-family:inherit; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    cursor:pointer; transition:transform .15s ease, opacity .15s ease, background .15s ease, color .15s ease;
+    flex-shrink:0;
+  }
+  .word-link:active{ transform:scale(0.94); }
+  .word-link.selected{ background:var(--text); color:var(--bg); border-color:var(--text); }
+
+  .timeline{ display:flex; height:38px; border-radius:9px; overflow:hidden; margin-bottom:16px; }
+  .timeline .seg{ display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:600; letter-spacing:.02em; border-right:1px solid var(--bg); }
+  .timeline .seg:last-child{ border-right:none; }
+  .timeline .seg.tok{ background:var(--tok-dim); color:var(--tok-text); }
+  .timeline .seg.kyo{ background:var(--kyo-dim); color:var(--kyo-text); }
+  .timeline .seg.tak{ background:var(--tak-dim); color:var(--tak-text); }
+  .timeline .seg.kan{ background:var(--kan-dim); color:var(--kan-text); }
+
+  .weekgrid{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .day{
+    flex:0 0 calc((100% - 42px)/8);
+    aspect-ratio:1/1.12; background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+    padding:4px 2px; transition:transform .15s ease, background .15s ease, border-color .15s ease; position:relative;
+  }
+  .day:active{ transform:scale(0.94); }
+  .day:hover{ background:var(--surface-hi); }
+  .day .num{ font-family:'Fraunces', serif; font-size:17px; font-weight:600; line-height:1; }
+  .day .mon{ font-size:8.5px; font-weight:600; color:var(--text-dim); margin-top:2px; letter-spacing:.03em; }
+  .day .dot{ width:5px;height:5px;border-radius:50%; margin-top:4px; }
+  .day.tok{ border-color:var(--tok-border); } .day.tok .dot{ background:var(--tok); }
+  .day.kyo{ border-color:var(--kyo-border); } .day.kyo .dot{ background:var(--kyo); }
+  .day.tak{ border-color:var(--tak-border); } .day.tak .dot{ background:var(--tak); }
+  .day.kan{ border-color:var(--kan-border); } .day.kan .dot{ background:var(--kan); }
+  .day.trip{ border-style:dashed; }
+  .day.travel{ background:linear-gradient(135deg, var(--surface-hi), var(--surface)); }
+  .day.travel .num{ text-decoration:underline; text-decoration-color:var(--text-faint); text-decoration-style:dotted; text-underline-offset:3px; }
+  .day.selected{ background:var(--text); border-color:var(--text); border-style:solid; }
+  .day.selected .num, .day.selected .mon{ color:var(--bg); }
+  .day.selected .dot{ background:var(--bg); }
+
+  .weekgrid-note{ font-size:11.5px; color:var(--text-faint); margin:-6px 0 18px; display:flex; gap:14px; flex-wrap:wrap; }
+  .weekgrid-note span{ display:inline-flex; align-items:center; gap:5px; }
+  .weekgrid-note i{ width:7px;height:7px;border-radius:50%; display:inline-block; }
+  .week-divider{ height:1px; background:linear-gradient(90deg, transparent, var(--kan) 15%, var(--kan) 85%, transparent); opacity:.55; margin-bottom:22px; }
+
+  .panel{ animation:panelIn .25s ease; }
+  @keyframes panelIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+
+  .detail-date{ font-size:13.5px; color:var(--text-dim); margin-bottom:4px; }
+  .detail-title{ font-family:'Fraunces', serif; font-weight:500; font-size:27px; margin:0 0 18px; line-height:1.15; text-wrap:balance; }
+
+  .badge{ display:inline-block; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; margin-bottom:18px; letter-spacing:.02em; }
+  .badge.tok{ background:var(--tok-dim); color:var(--tok-text); }
+  .badge.kyo{ background:var(--kyo-dim); color:var(--kyo-text); }
+  .badge.tak{ background:var(--tak-dim); color:var(--tak-text); }
+  .badge.kan{ background:var(--kan-dim); color:var(--kan-text); }
+
+  .block{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 17px; margin-bottom:12px; }
+  .block-label{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+  .block--transit{ background:var(--transit-bg); border-color:var(--transit-border); }
+  .block--transit .block-label{ color:var(--transit-icon); }
+  .block--hotel{ background:var(--hotel-bg); border-color:var(--hotel-border); }
+  .block--hotel .block-label{ color:var(--hotel-icon); }
+
+  .leg{ margin-bottom:10px; }
+  .leg:last-child{ margin-bottom:0; }
+  .route{ display:flex; align-items:center; justify-content:space-between; }
+  .route .pt{ text-align:center; }
+  .route .pt .code{ font-family:'Fraunces', serif; font-size:19px; font-weight:500; }
+  .route .pt .time{ font-size:13.5px; color:var(--text-dim); margin-top:2px; }
+  .route .mid{ flex:1; display:flex; flex-direction:column; align-items:center; padding:0 10px; color:var(--text-faint); }
+  .route .mid .line{ width:100%; height:1px; background:var(--line); position:relative; margin:4px 0; }
+  .route .mid .line:after{ content:"🚅"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--transit-bg); padding:0 6px; font-size:13px; }
+  .route .mid .dur{ font-size:11.5px; }
+  .change{ font-size:11.5px; color:var(--text-faint); text-align:center; padding:6px 0; font-style:italic; }
+  .meta-row{ display:flex; justify-content:space-between; font-size:13.5px; color:var(--text-dim); padding-top:9px; border-top:1px solid var(--line); margin-top:9px; }
+
+  .hotel-name{ font-family:'Fraunces', serif; font-size:19px; font-weight:500; margin-bottom:6px; }
+  .addr{ font-size:14px; color:var(--text-dim); margin-bottom:10px; }
+  .hoursrow{ display:flex; gap:20px; font-size:13.5px; }
+  .hoursrow div span{ display:block; color:var(--text-dim); font-size:11px; margin-bottom:2px;}
+
+  .tip{ font-size:14px; line-height:1.55; color:var(--text); }
+  .tip strong{ color:var(--kan); font-weight:600; }
+  .tip + .tip{ margin-top:9px; padding-top:9px; border-top:1px solid var(--line); }
+
+  .maplink{ display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; margin-left:5px; color:var(--text-faint); vertical-align:middle; opacity:.85; transition:opacity .15s ease, color .15s ease, transform .15s ease; }
+  .maplink svg{ width:100%; height:100%; fill:currentColor; }
+  .maplink:hover{ color:var(--kan); opacity:1; }
+  .maplink:active{ transform:scale(0.85); }
+
+  .plan{ display:flex; gap:13px; padding:12px 0; }
+  .plan:not(:last-child){ border-bottom:1px solid var(--line); }
+  .plan .when{ width:56px; flex-shrink:0; font-size:12.5px; color:var(--text-dim); padding-top:1px; }
+  .plan .what strong{ display:block; font-size:15px; font-weight:600; margin-bottom:3px; }
+  .plan .what p{ margin:0; font-size:13.5px; color:var(--text-dim); line-height:1.5; }
+  .plan .what .alt{ display:block; margin-top:5px; font-size:12.5px; color:var(--text-faint); font-style:italic; }
+  .plan .what .hours{ display:inline-block; margin-top:6px; font-size:12px; color:var(--kan); font-style:italic; }
+
+  .navrow{ display:flex; justify-content:space-between; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
+  .navbtn{ background:none; border:none; color:var(--text-dim); font-family:'IBM Plex Sans', sans-serif; font-size:14px; cursor:pointer; display:flex; flex-direction:column; gap:2px; }
+  .navbtn.next{ text-align:right; align-items:flex-end; }
+  .navbtn span{ font-size:11.5px; color:var(--text-dim); }
+  .navbtn:active{ opacity:.6; }
+  .navbtn.hidden{ visibility:hidden; }
+
+  .words-legend{ border-radius:12px; padding:14px 16px; margin-bottom:14px; font-size:13px; line-height:1.6; background:var(--surface-hi); color:var(--text); }
+  .words-legend b{ font-family:'Fraunces', serif; font-weight:600; color:var(--kan); }
+  .words-legend .rules{ margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+  .prow{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:7px 0; border-bottom:1px solid var(--line); }
+  .prow:last-child{ border-bottom:none; }
+  .prow .pen{ font-size:13px; color:var(--text-dim); flex-shrink:0; width:42%; padding-top:2px; }
+  .prow .pnative{ text-align:right; }
+  .prow .pjp{ font-family:'Fraunces', serif; font-size:16px; font-weight:500; }
+  .prow .proma{ font-size:12px; color:var(--text-dim); font-style:italic; margin-top:2px; }
+
+  .theme-toggle{ position:fixed; top:22px; right:20px; width:38px; height:38px; border-radius:50%; background:var(--toggle-bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20; transition:background .25s ease, border-color .25s ease, transform .15s ease; }
+  .theme-toggle:active{ transform:scale(0.92); }
+  .theme-toggle svg{ width:18px; height:18px; stroke:var(--toggle-icon); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .theme-toggle .icon-sun{ display:none; }
+  html[data-theme="light"] .theme-toggle .icon-moon{ display:none; }
+  html[data-theme="light"] .theme-toggle .icon-sun{ display:block; }
+  @media (prefers-color-scheme: light){
+    html:not([data-theme="dark"]) .theme-toggle .icon-moon{ display:none; }
+    html:not([data-theme="dark"]) .theme-toggle .icon-sun{ display:block; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+
+<div class="app">
+  <div class="eyebrow">TRIP · 30 SEP – 14 OCT 2026</div>
+  <h1>Tokyo, Kyoto, Takayama <span style="color:var(--text-faint); font-style:italic; font-weight:400;">&amp;</span> Kanazawa</h1>
+  <div class="daterange">
+    <span>15 days · 4 cities · trains between them</span>
+    <button class="word-link" id="linkWords" type="button" onclick="selectWords()">日本語 Words</button>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+
+  <div class="weekgrid" id="week"></div>
+  <div class="weekgrid-note">
+    <span><i style="background:var(--tok)"></i>Tokyo</span>
+    <span><i style="background:var(--kyo)"></i>Kyoto</span>
+    <span><i style="background:var(--tak)"></i>Takayama</span>
+    <span><i style="background:var(--kan)"></i>Kanazawa</span>
+    <span>dashed = day trip</span>
+  </div>
+  <div class="week-divider"></div>
+
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+const PIN_SVG = '<svg viewBox="0 0 24 24"><path d="M12 21s-7-7.05-7-12a7 7 0 1 1 14 0c0 4.95-7 12-7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>';
+function pin(query){
+  return `<a class="maplink" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}" target="_blank" rel="noopener" aria-label="Open in Google Maps">${PIN_SVG}</a>`;
+}
+
+// ---- shared block renderers ----
+function hotelBlock(name, mapQuery, addr, checkin, checkout, note){
+  return `
+    <div class="block block--hotel">
+      <div class="block-label">Stay</div>
+      <div class="hotel-name">${name}${mapQuery ? pin(mapQuery) : ''}</div>
+      ${addr ? `<div class="addr">${addr}</div>` : ''}
+      ${checkin || checkout ? `<div class="hoursrow">
+        <div><span>Check-in</span>${checkin || '—'}</div>
+        <div><span>Check-out</span>${checkout || '—'}</div>
+      </div>` : ''}
+      ${note ? `<div class="addr" style="margin-top:8px;margin-bottom:0;">${note}</div>` : ''}
+    </div>`;
+}
+
+function transitBlock(label, legs){
+  const legsHtml = legs.map((leg, i) => `
+    ${i > 0 ? `<div class="change">Change at ${leg.changeAt || leg.from.code} — ${leg.changeGap || ''}</div>` : ''}
+    <div class="leg">
+      <div class="route">
+        <div class="pt"><div class="code">${leg.from.code}</div><div class="time">${leg.from.time}</div></div>
+        <div class="mid"><div class="line"></div><div class="dur">${leg.dur}</div></div>
+        <div class="pt"><div class="code">${leg.to.code}</div><div class="time">${leg.to.time}</div></div>
+      </div>
+      <div class="meta-row"><span>${leg.train}</span><span>${leg.note || ''}</span></div>
+    </div>
+  `).join('');
+  return `<div class="block block--transit"><div class="block-label">${label}</div>${legsHtml}</div>`;
+}
+
+function planBlock(label, rows){
+  const rowsHtml = rows.map(r => `
+    <div class="plan">
+      <div class="when">${r.when}</div>
+      <div class="what">
+        <strong>${r.what}</strong>
+        ${r.p ? `<p>${r.p}</p>` : ''}
+        ${r.alt ? `<span class="alt">Alternatively: ${r.alt}</span>` : ''}
+        ${r.hours ? `<span class="hours">${r.hours}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+  return `<div class="block"><div class="block-label">${label}</div>${rowsHtml}</div>`;
+}
+
+function tipBlock(label, tips){
+  return `<div class="block"><div class="block-label">${label}</div>${tips.map(t=>`<div class="tip">${t}</div>`).join('')}</div>`;
+}
+
+// ---- trip data ----
+const CITY_NAMES = { tok:"Tokyo", kyo:"Kyoto", tak:"Takayama", kan:"Kanazawa" };
+
+const days = [
+{ id:0, date:"30 September", weekday:"Wednesday", month:"SEP", num:30, city:"tok", travel:true,
+  title:"Home → Tokyo",
+  render:()=>`
+    <div class="detail-date">Wednesday, 30 September</div>
+    <div class="detail-title">Home → Tokyo</div>
+    <span class="badge tok">ARRIVAL DAY · TOKYO</span>
+    ${hotelBlock("Tokyo hotel", null, null, "3:00pm", null, "Not named in the source plan yet. “Head back to hotel to officially check in, rest until undisclosed time.”")}
+    ${planBlock("Morning", [
+      {when:"", what:"Arrive Haneda", p:"Collect bags — immigration/customs, train to hotel and drop bags at hotel."},
+      {when:"", what:"Tokyo National Museum"+pin("Tokyo National Museum"), p:"Huge collection covering samurai armor, ceramics, and Buddhist art."}
+    ])}
+    ${planBlock("Early Afternoon", [
+      {when:"", what:"National Museum of Western Art"+pin("National Museum of Western Art Tokyo"), p:"Monet, Rodin, and other Western masters — Le Corbusier‑designed building."},
+      {when:"Lunch", what:"Ueno", p:"Grab something in the park or Museum cafes."},
+      {when:"", what:"Shitamachi Museum"+pin("Shitamachi Museum Tokyo"), p:"Small, atmospheric recreation of old Tokyo shopping street life."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Asakusa & Sensō‑ji Temple"+pin("Sensoji Temple Asakusa Tokyo")+" (evening stroll)", p:"Easy, low‑key evening close to Ueno — Nakamise street for snacks, early night to fight jet lag."}
+    ])}
+  `
+},
+{ id:1, date:"1 October", weekday:"Thursday", month:"OCT", num:1, city:"tok", travel:false,
+  title:"Tokyo",
+  render:()=>`
+    <div class="detail-date">Thursday, 1 October</div>
+    <div class="detail-title">In Tokyo</div>
+    <span class="badge tok">TOKYO</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Tokyo Station"+pin("Tokyo Station Marunouchi")+" (Marunouchi façade)", p:"Historic red‑brick Marunouchi façade, restored to its 1914 look."},
+      {when:"", what:"Imperial Palace East Gardens"+pin("Imperial Palace East Gardens Tokyo"), p:"Peaceful gardens, free entry, right by the station."}
+    ])}
+    ${planBlock("Early Afternoon", [
+      {when:"", what:"Zōjō‑ji Temple"+pin("Zojoji Temple Tokyo"), p:"Historic temple, main gate for the Tokugawa shoguns, right next to Tokyo Tower."},
+      {when:"", what:"Tokyo Tower"+pin("Tokyo Tower")+" (exterior/surroundings)", p:"Admiring it from the park and surroundings — nice spot for a picnic. Maybe go up if we feel like it."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Atago Jinja"+pin("Atago Jinja Tokyo"), p:"Small hilltop shrine famous for its steep ‘Success Stairs’."},
+      {when:"", what:"Mori Art Museum"+pin("Mori Art Museum Roppongi Hills"), p:"Contemporary art with panoramic city views from Roppongi Hills. Head back to hotel and rest."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Shinjuku night life", p:"Gay bars: Eagle Tokyo Blue / Dragon Man / Kaiser."}
+    ])}
+  `
+},
+{ id:2, date:"2 October", weekday:"Friday", month:"OCT", num:2, city:"tok", travel:false,
+  title:"Tokyo",
+  render:()=>`
+    <div class="detail-date">Friday, 2 October</div>
+    <div class="detail-title">In Tokyo</div>
+    <span class="badge tok">TOKYO</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Tokyo Metropolitan Government Building"+pin("Tokyo Metropolitan Government Building"), p:"Free observation decks, best visibility earlier in the day before haze builds."},
+      {when:"", what:"Meiji Shrine"+pin("Meiji Shrine Tokyo"), p:"Peaceful forested shrine, best visited before crowds."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Yoyogi Park"+pin("Yoyogi Park Tokyo"), p:"Wide green park right next to the shrine, good spot to stretch legs."},
+      {when:"", what:"Harajuku — Takeshita Street"+pin("Takeshita Street Harajuku"), p:"Quirky shops, crepes, youth fashion."},
+      {when:"", what:"Check energy/time levels — follow for the following options", p:"Nezu museum — Japanese & East Asian art museum with pre‑modern pieces in various media.", alt:"Omotesandō & Cat Street — upscale, tree‑lined shopping street connecting to Shibuya (optional). Shibuya Crossing — up to 3,000 people crossing at once during peak hours (optional)."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Shibuya & Shinjuku at night", p:""}
+    ])}
+  `
+},
+{ id:3, date:"3 October", weekday:"Saturday", month:"OCT", num:3, city:"tok", travel:false,
+  title:"Tokyo",
+  render:()=>`
+    <div class="detail-date">Saturday, 3 October</div>
+    <div class="detail-title">In Tokyo</div>
+    <span class="badge tok">TOKYO</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Hie Shrine"+pin("Hie Shrine Tokyo"), p:"Historic shrine with a striking vermillion torii tunnel and city views."},
+      {when:"", what:"Toyokawa Inari Betsuin"+pin("Toyokawa Inari Betsuin Tokyo"), p:"A few minutes' walk from Hie Shrine, known for its fox statues."}
+    ])}
+    ${planBlock("Midday", [
+      {when:"", what:"Edo‑Tokyo Museum"+pin("Edo-Tokyo Museum Ryogoku"), p:"Across town to Ryōgoku — immersive exhibits on old Edo and Tokyo's history."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Sumida Hokusai Museum"+pin("Sumida Hokusai Museum"), p:"Right by the Edo‑Tokyo Museum, dedicated to the ukiyo‑e master."}
+    ])}
+    ${planBlock("Late afternoon", [
+      {when:"", what:"Tokyo Skytree"+pin("Tokyo Skytree"), p:"Short hop from Ryōgoku — great views, no need to go up if already done elsewhere."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Boat to Odaiba"+pin("Odaiba Tokyo"), p:"Water bus from the pier near Asakusa, scenic ride along the Sumida River."}
+    ])}
+  `
+},
+{ id:4, date:"4 October", weekday:"Sunday", month:"OCT", num:4, city:"kyo", travel:true,
+  title:"Tokyo → Kyoto",
+  render:()=>`
+    <div class="detail-date">Sunday, 4 October</div>
+    <div class="detail-title">Tokyo → Kyoto</div>
+    <span class="badge kyo">TRAVEL DAY · TOKYO → KYOTO</span>
+    ${transitBlock("Train", [
+      { from:{code:"TOKYO", time:"10:12"}, to:{code:"KYOTO", time:"12:23"}, train:"Nazomi 23", dur:"2h 11m" }
+    ])}
+    ${hotelBlock("Tokyu Stay Sanjo‑Karasuma", "Tokyu Stay Sanjo Karasuma Kyoto", null, "3:00pm", null)}
+    ${planBlock("Rest of the day", [
+      {when:"", what:"Karasuma line to the hotel", p:"Drop bags at hotel and go for a wander before check‑in time, then back on the Karasuma line to Kyoto Station to visit the sights of:"},
+      {when:"", what:"Higashi Hongan‑ji Temple"+pin("Higashi Honganji Temple Kyoto"), p:""},
+      {when:"", what:"Nishi Hongan‑ji Temple"+pin("Nishi Honganji Temple Kyoto"), p:""},
+      {when:"", what:"Tō‑ji Temple"+pin("Toji Temple Kyoto"), p:"", alt:"Shōsei‑en Garden"},
+      {when:"", what:"Check‑in", p:"Rest."},
+      {when:"Evening", what:"Dinner nearby hotel", p:"Afterwards maybe a late night walk around Sannenzaka and Ninenzaka."}
+    ])}
+  `
+},
+{ id:5, date:"5 October", weekday:"Monday", month:"OCT", num:5, city:"kyo", travel:false,
+  title:"Kyoto",
+  render:()=>`
+    <div class="detail-date">Monday, 5 October</div>
+    <div class="detail-title">In Kyoto</div>
+    <span class="badge kyo">KYOTO</span>
+    ${planBlock("Morning — Philosopher's Path", [
+      {when:"", what:"Peaceful canal‑side walk (2 kilometres)"+pin("Philosophers Path Kyoto"), p:"Passing small and big temples."},
+      {when:"", what:"Ginkaku‑ji (Silver Pavilion)", p:"The path's northern starting point, famous for its moss garden and sand cone."},
+      {when:"", what:"Hōnen‑in", p:"Small, quiet temple just off the path, known for its thatched gate and mossy grounds."},
+      {when:"", what:"Otoyo Shrine", p:"A small Shinto shrine with unusual mouse, monkey, and owl statues guarding it."},
+      {when:"", what:"Anraku‑ji", p:"Modest temple with a peaceful garden, sometimes closed to the public except in spring/autumn."},
+      {when:"", what:"Reikan‑ji", p:"Small nunnery temple, occasionally open seasonally."},
+      {when:"", what:"Nyakuōji Shrine", p:"Another minor shrine along the route."},
+      {when:"", what:"Eikan‑dō (Zenrin‑ji)", p:"Just off the southern end, especially popular for its autumn maple colors."},
+      {when:"", what:"Nanzen‑ji", p:"The path's southern endpoint, a major Zen temple complex with an impressive aqueduct and gardens."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"Lunch", what:"Somewhere nearby", p:""},
+      {when:"", what:"Kyoto City KYOCERA Museum of Art", p:""},
+      {when:"", what:"Heian‑jingū Shrine and Gardens", p:""},
+      {when:"", what:"Kiyomizu‑dera"+pin("Kiyomizu-dera Kyoto"), p:""},
+      {when:"", what:"Hōkan‑ji Temple (Yasaka Pagoda)", p:""},
+      {when:"", what:"Yasaka Shrine", p:"Back at hotel for rest and refresh."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Pontochō alley"+pin("Pontocho Alley Kyoto")+" for dinner", p:"Stroll along the river, go for a late night Gion walk around Hanamikoji Street (Geisha street)."}
+    ])}
+  `
+},
+{ id:6, date:"6 October", weekday:"Tuesday", month:"OCT", num:6, city:"kyo", travel:false,
+  title:"Kyoto",
+  render:()=>`
+    <div class="detail-date">Tuesday, 6 October</div>
+    <div class="detail-title">In Kyoto</div>
+    <span class="badge kyo">KYOTO</span>
+    ${planBlock("Morning — Arashiyama", [
+      {when:"", what:"Arashiyama"+pin("Arashiyama Bamboo Grove Kyoto"), p:"Famous for towering bamboo groves, historic Zen temples, and the iconic Togetsukyō Bridge. For over a thousand years, it has served as a celebrated natural retreat for Japanese aristocrats, blending dramatic river and mountain landscapes with rich cultural heritage."},
+      {when:"", what:"Togetsukyō Bridge, Arashiyama Bamboo Forest, Jōjakkōji Temple, Giōji Temple, Adashino Nenbutsuji Temple, Otagi Nenbutsuji", p:"", alt:"Daikaku‑ji Temple"}
+    ])}
+    ${planBlock("Midday", [
+      {when:"Lunch", what:"Around Arashiyama by the river", p:"Take a boat trip along the river.", alt:"Arashiyama Yusai‑Tei Gallery — or Arashiyama Monkey Park Iwatayama"}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Head back to hotel", p:"Rest, maybe nap — maybe look for an onsen to bathe."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"teamLab Kyoto"+pin("teamLab Kyoto"), p:"Last entry at 19:00."}
+    ])}
+  `
+},
+{ id:7, date:"7 October", weekday:"Wednesday", month:"OCT", num:7, city:"kyo", travel:false, trip:true,
+  title:"Kyoto (day trip: Nara)",
+  render:()=>`
+    <div class="detail-date">Wednesday, 7 October</div>
+    <div class="detail-title">Day trip to Nara</div>
+    <span class="badge kyo">MORNING/AFTERNOON · DAY TRIP TO NARA</span>
+    ${tipBlock("Getting there", [
+      "Japan's first permanent capital. It features over a thousand free‑roaming sacred deer, the massive Tōdai‑ji Temple housing a giant bronze Buddha, and ancient shrines filled with thousands of stone and bronze lanterns.",
+      "A return train ride from Kyoto to Nara costs between ¥720 and ¥1,280 (£8 to £16) depending on the line and train type. The trip takes about 35 to 45 minutes on direct express options. Arriving in Nara we can take a 15min bus ride to the main area of Nara Park where we can find:"
+    ])}
+    ${planBlock("In Nara", [
+      {when:"", what:"Nandaimon Gate", p:""},
+      {when:"", what:"Tōdaiji Kagami‑ike Pond", p:""},
+      {when:"", what:"Tōdai‑ji", p:""},
+      {when:"", what:"Nigatsu‑do", p:""},
+      {when:"", what:"Higashimuki Shopping Street", p:""},
+      {when:"", what:"Nakatanidou sweets shopping street", p:""},
+      {when:"", what:"Naramachi Historic District", p:"", alt:"Kasugataisha Shrine — Shiga Naoya's Old Residence"}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Back in Kyoto", p:"Enjoy a relaxing evening around the river and hotel area, maybe enjoy an onsen."}
+    ])}
+  `
+},
+{ id:8, date:"8 October", weekday:"Thursday", month:"OCT", num:8, city:"kyo", travel:false,
+  title:"Kyoto",
+  render:()=>`
+    <div class="detail-date">Thursday, 8 October</div>
+    <div class="detail-title">In Kyoto</div>
+    <span class="badge kyo">KYOTO</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Fushimi Inari"+pin("Fushimi Inari Shrine Kyoto"), p:"Ideally early rise to see the sunrise from Inari gates, a slow morning walk, enjoying the ambience more quiet and serene, hearing the nature surrounding and with lesser crowds. Once down find a local place to eat breakfast and carry on exploring the temples on south east of the city, such as:"},
+      {when:"", what:"Tōfuku‑ji Temple", p:""},
+      {when:"", what:"Tsuten‑kyo Bridge", p:""},
+      {when:"", what:"Reigen‑in Temple", p:""},
+      {when:"", what:"Sanjūsangendō Temple / 1001 Statues", p:"Do a big loop over to Nijō Castle and afterwards take the Number 12 bus to Kinkaku‑ji"+pin("Kinkaku-ji Kyoto")+"."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Return to the hotel", p:"Rest due to the early start. Enjoy the rest of the day locally, looking for last minute souvenirs, and saying bye to the city."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Nice dinner somewhere", p:""}
+    ])}
+  `
+},
+{ id:9, date:"9 October", weekday:"Friday", month:"OCT", num:9, city:"tak", travel:true,
+  title:"Kyoto → Takayama",
+  render:()=>`
+    <div class="detail-date">Friday, 9 October</div>
+    <div class="detail-title">Kyoto → Takayama</div>
+    <span class="badge tak">TRAVEL DAY · KYOTO → TAKAYAMA</span>
+    ${transitBlock("Train (one change)", [
+      { from:{code:"KYOTO", time:"09:33"}, to:{code:"NAGOYA", time:"10:25"}, train:"Hikari 644", dur:"52m" },
+      { from:{code:"NAGOYA", time:"10:48"}, to:{code:"TAKAYAMA", time:"13:15"}, train:"Hida 7", dur:"2h 27m", changeAt:"Nagoya", changeGap:"23 min to change" }
+    ])}
+    ${tipBlock("Worth double‑checking", [
+      "The Kyoto‑side doc gives the Takayama arrival as 13:12pm; the Takayama‑side doc gives 13:15. Both say the same route (Hikari 644 to Nagoya, change to Hida 7) — just flagging the small mismatch between the two source documents rather than picking one."
+    ])}
+    ${hotelBlock("Airbnb", "Takayama accommodation", null, "4:00pm", null, "Store luggage at station or in a convenient place until check‑in.")}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Wander in town", p:"Until check‑in time allows us inside the accommodation."},
+      {when:"", what:"Old Town / Sanmachi Suji"+pin("Sanmachi Suji Takayama"), p:"Wander merchant streets, sake breweries, snacks."},
+      {when:"~15:00", what:"Afternoon yatai parade + mikoshi procession", p:""},
+      {when:"", what:"Sakurayama Hachimangu Shrine"+pin("Sakurayama Hachimangu Shrine Takayama"), p:"Circa‑5th‑century shrine in a serene, wooded locale, known for its festivals & colorful floats. Open 24/7 — also interesting to visit later in the evening."}
+    ])}
+    ${planBlock("Check‑in — 16:00", [
+      {when:"", what:"Rest + relax", p:"If interested in watching the Yatai parade, arrive around 18:00 at Omotesandō Street"+pin("Omotesando Street Takayama")+" where the festival gathers and starts its procession. Parade happens from 18:30 until 21:00."},
+      {when:"", what:"The Floats", p:"Handcrafted, multi‑tier festival carts decorated with intricate wood carvings and metalwork."},
+      {when:"", what:"The Lanterns", p:"Around 100, flickering paper lanterns attached to each float."},
+      {when:"", what:"The Atmosphere", p:"Traditional flute and drum music echoes through old‑town alleys as the glowing carts move in the night."}
+    ])}
+  `
+},
+{ id:10, date:"10 October", weekday:"Saturday", month:"OCT", num:10, city:"tak", travel:false,
+  title:"Takayama",
+  render:()=>`
+    <div class="detail-date">Saturday, 10 October</div>
+    <div class="detail-title">In Takayama</div>
+    <span class="badge tak">TAKAYAMA</span>
+    ${planBlock("Morning/Afternoon", [
+      {when:"", what:"Sakurayama Hachimangu Shrine", p:"Karakuri marionette performances. Also Yatai Kaikan (Float Exhibition Hall) allowing visitors to view four of the town's magnificent, centuries‑old wooden festival floats."},
+      {when:"", what:"Takayama Jinya"+pin("Takayama Jinya"), p:"Only preserved Edo‑period government house in Japan."},
+      {when:"", what:"Mikoshi return parade", p:"A Japanese Shinto festival event where a portable shrine (mikoshi), which carries a deity temporarily housed around the city or at an interim resting place (otabisho), is triumphantly carried back to its main shrine. Expect crowds and high energy chants."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Reserve a restaurant", p:"Preferred due to festival — high density in town of tourists. Specialty: Hida wagyu."}
+    ])}
+  `
+},
+{ id:11, date:"11 October", weekday:"Sunday", month:"OCT", num:11, city:"kan", travel:true,
+  title:"Takayama → Kanazawa",
+  render:()=>`
+    <div class="detail-date">Sunday, 11 October</div>
+    <div class="detail-title">Takayama → Kanazawa</div>
+    <span class="badge kan">TRAVEL DAY · TAKAYAMA → KANAZAWA</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Takayama Morning Market"+pin("Takayama Morning Market"), p:"Miyagawa or Jinya‑mae market along the river."},
+      {when:"", what:"Old Town craft & sake shops", p:"Browse shops now open (closed during festival)."},
+      {when:"Check‑out by 11:00", what:"Drop suitcases on a storage locker", p:"Stroll around the city checking souvenirs and a quiet ambience post festival."},
+      {when:"", what:"Kusakabe Heritage House", p:"Local history museum in a converted merchant house."},
+      {when:"", what:"Enako River / Nakabashi Bridge stroll", p:"Riverside walk lined with willows and cafes."},
+      {when:"", what:"Higashiyama Walking Course", p:"A 3.5‑kilometer (2.2 mile) self‑guided trail in Takayama. It takes about 1.5 to 2 hours to complete. The path leads through a quiet historic temple district, peaceful backstreets, and the forested hills of Shiroyama Park."}
+    ])}
+    ${transitBlock("Train (one change)", [
+      { from:{code:"TAKAYAMA", time:"15:17"}, to:{code:"TOYAMA", time:"16:44"}, train:"Hida 11", dur:"1h 27m" },
+      { from:{code:"TOYAMA", time:"17:31"}, to:{code:"KANAZAWA", time:"17:53"}, train:"Tsuguri 39", dur:"22m", changeAt:"Toyama", changeGap:"47 min to change" }
+    ])}
+    ${hotelBlock("Hotel Torifito Kanazawa", "Hotel Torifito Kanazawa", null, null, null)}
+    ${planBlock("Evening", [
+      {when:"", what:"Higashi Chaya District"+pin("Higashi Chaya District Kanazawa"), p:"(8min bus/25 min walk) — easy stroll through the lantern‑lit teahouse streets. Walking down atmospheric Edo‑period streets lined with striking wooden lattice buildings (kimusuko) — dinner nearby. During the day the houses offer tours of preserved teahouses turned museums, experience Kanazawa's renowned gold leaf crafts shops and enjoy local treats."}
+    ])}
+  `
+},
+{ id:12, date:"12 October", weekday:"Monday", month:"OCT", num:12, city:"kan", travel:false,
+  title:"Kanazawa",
+  render:()=>`
+    <div class="detail-date">Monday, 12 October</div>
+    <div class="detail-title">In Kanazawa</div>
+    <span class="badge kan">KANAZAWA</span>
+    ${planBlock("Morning", [
+      {when:"", what:"Kenroku‑en Garden"+pin("Kenrokuen Garden Kanazawa"), p:"One of Japan's top three gardens, best visited right at opening."},
+      {when:"", what:"Kanazawa Castle Park"+pin("Kanazawa Castle Park"), p:"Reconstructed castle grounds next to Kenroku‑en."}
+    ])}
+    ${planBlock("Lunch", [
+      {when:"", what:"Ōmichō Market"+pin("Omicho Market Kanazawa"), p:"Kanazawa's kitchen — fresh seafood lunch and stalls."}
+    ])}
+    ${planBlock("Afternoon", [
+      {when:"", what:"Nagamachi Samurai District"+pin("Nagamachi Samurai District Kanazawa"), p:"Beautifully preserved samurai house and old earthen‑walled streets. Earthen Wall Lanes (Nagamachi Buke Yashiki‑mura) — very picturesque and narrow cobblestone lanes, and historic water canals. It was once home to middle‑ and high‑ranking samurai families serving the Kaga Domain during the Edo period."},
+      {when:"", what:"Nomura Samurai House (Nomura‑ke)", p:""},
+      {when:"", what:"Oyama Shrine", p:"Striking stained‑glass gate near the castle."},
+      {when:"", what:"Kazuemachi Chaya District", p:"Riverside teahouse street."}
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Nishi Chaya District"+pin("Nishi Chaya District Kanazawa"), p:"Quieter, smaller teahouse district for an evening wander and dinner options."}
+    ])}
+  `
+},
+{ id:13, date:"13 October", weekday:"Tuesday", month:"OCT", num:13, city:"kan", travel:false, trip:true,
+  title:"Kanazawa (day trip: Shirakawa‑go)",
+  render:()=>`
+    <div class="detail-date">Tuesday, 13 October</div>
+    <div class="detail-title">Day trip to Shirakawa‑go</div>
+    <span class="badge kan">MORNING/EARLY AFTERNOON · DAY TRIP TO SHIRAKAWA‑GO</span>
+    ${tipBlock("Getting there", [
+      "By bus from Kanazawa Station, about 75‑80 min each way — tickets to be booked in advance to guarantee seats (Hokutetsu/Nohi).",
+      "Outbound: 8:40am from Kanazawa Station → Shirakawa‑go around 10:00am. Return: 15:00 from Shirakawa‑go → Kanazawa around 16:30.",
+      "Shirakawa‑go is a UNESCO World Heritage village in Gifu Prefecture famous for its gassho‑zukuri farmhouses — steep, thatched roofs (shaped like praying hands, which is what “gassho” means) built to shed heavy snow. The village features carefully preserved buildings over 250 years old. Is still a genuinely lived‑in village — around 700 people still live there — rather than a recreated museum piece, set against a dramatic mountain valley backdrop. Mostly set in Ogimachi Village."
+    ])}
+    ${planBlock("In the village", [
+      {when:"", what:"Myōzen‑ji Temple", p:"A Buddhist temple notable for having the only gassho‑style bell tower and main hall in Japan."},
+      {when:"", what:"Wada House", p:"One of the most prominent and largest houses in the village, open to the public. You can walk through multiple floors to see how a farming family actually lived and worked."},
+      {when:"", what:"Hachiman Shrine Shirakawa", p:"A quiet shrine founded over 1,300 years ago, home to an aged cedar tree considered a local natural treasure."},
+      {when:"", what:"Shiroyama Viewpoint (Observation Deck)", p:"For panoramic view of the village."},
+      {when:"", what:"Deai Bridge", p:"Pedestrian suspended bridge with good views of the Shogawa River, surrounding mountains, and traditional gassho‑style houses, with beautiful scenery."}
+    ])}
+    ${tipBlock("Lunch", [
+      "To be booked, popular village good places go very fast: specialities — Hida beef and soba."
+    ])}
+    ${planBlock("Evening", [
+      {when:"", what:"Stroll in our preferred areas", p:"Buy some souvenirs and have dinner."}
+    ])}
+  `
+},
+{ id:14, date:"14 October", weekday:"Wednesday", month:"OCT", num:14, city:"tok", travel:true,
+  title:"Kanazawa → Tokyo",
+  render:()=>`
+    <div class="detail-date">Wednesday, 14 October</div>
+    <div class="detail-title">Kanazawa → Tokyo</div>
+    <span class="badge tok">TRAVEL DAY</span>
+    ${transitBlock("Train", [
+      { from:{code:"KANAZAWA", time:"10:05"}, to:{code:"TOKYO", time:"12:36"}, train:"Kagayaki 508", dur:"2h 31m" }
+    ])}
+    ${tipBlock("Beyond this point", [
+      "The source plan doesn't yet cover onward travel or a flight home from here — nothing invented in its place."
+    ])}
+  `
+}
+];
+
+const wordCategories = [
+  {title:"Essentials", rows:[
+    ["Hello","こんにちは","kon‑ni‑chi‑wa"],
+    ["Good morning","おはようございます","o‑ha‑yō go‑zai‑mas"],
+    ["Good evening","こんばんは","kon‑ban‑wa"],
+    ["Goodbye","さようなら","sa‑yō‑na‑ra"],
+    ["Please","お願いします","o‑ne‑gai shi‑mas"],
+    ["Thank you","ありがとうございます","a‑ri‑ga‑tō go‑zai‑mas"],
+    ["Yes / No","はい / いいえ","hai / ī‑e"],
+    ["Excuse me / Sorry","すみません","su‑mi‑ma‑sen"],
+    ["Do you speak English?","英語を話せますか？","ei‑go o ha‑na‑se‑mas ka"],
+    ["I don't understand","わかりません","wa‑ka‑ri‑ma‑sen"]
+  ]},
+  {title:"Numbers", rows:[
+    ["1 / 2 / 3","一 / 二 / 三","i‑chi / ni / san"],
+    ["4 / 5 / 6","四 / 五 / 六","yon / go / ro‑ku"],
+    ["7 / 8 / 9","七 / 八 / 九","na‑na / ha‑chi / kyū"],
+    ["10 / 100","十 / 百","jū / hya‑ku"]
+  ]},
+  {title:"Directions", rows:[
+    ["Where is...?","...はどこですか？","...wa do‑ko des ka"],
+    ["Left / Right","左 / 右","hi‑da‑ri / mi‑gi"],
+    ["Straight ahead","まっすぐ","mas‑su‑gu"],
+    ["Near / Far","近い / 遠い","chi‑kai / tō‑i"]
+  ]},
+  {title:"Trains & transport", rows:[
+    ["Station","駅","e‑ki"],
+    ["Ticket","切符","kip‑pu"],
+    ["Reserved seat","指定席","shi‑tei‑se‑ki"],
+    ["What platform?","何番線ですか？","nan‑ban‑sen des ka"],
+    ["Does this go to...?","これは...行きですか？","ko‑re wa ...yu‑ki des ka"],
+    ["Change (trains)","乗り換え","no‑ri‑ka‑e"]
+  ]},
+  {title:"Hotel", rows:[
+    ["Reservation","予約","yo‑ya‑ku"],
+    ["Room / Key","部屋 / 鍵","he‑ya / ka‑gi"],
+    ["Is breakfast included?","朝食は付いていますか？","chō‑sho‑ku wa tsu‑i‑te i‑mas ka"],
+    ["What time is check‑out?","チェックアウトは何時ですか？","chek‑ku‑au‑to wa nan‑ji des ka"]
+  ]},
+  {title:"Restaurant", rows:[
+    ["Table for two","二人です","fu‑ta‑ri des"],
+    ["Menu / Water","メニュー / お水","me‑nyū / o‑mi‑zu"],
+    ["The bill, please","お会計お願いします","o‑kai‑kei o‑ne‑gai shi‑mas"],
+    ["I'm vegetarian","ベジタリアンです","be‑ji‑ta‑ri‑an des"],
+    ["Cheers!","乾杯！","kam‑pai"],
+    ["Delicious","おいしい","oi‑shī"]
+  ]},
+  {title:"Money & shopping", rows:[
+    ["How much is this?","いくらですか？","i‑ku‑ra des ka"],
+    ["Can I pay by card?","カードで払えますか？","kā‑do de ha‑ra‑e‑mas ka"],
+    ["Receipt","領収書","ryō‑shū‑sho"]
+  ]},
+  {title:"Emergency", rows:[
+    ["Help!","助けて！","ta‑su‑ke‑te"],
+    ["I need a doctor","医者が必要です","i‑sha ga hi‑tsu‑yō des"],
+    ["Police","警察","kei‑sa‑tsu"],
+    ["Emergency number","110 (police) / 119 (ambulance, fire)",""]
+  ]}
+];
+
+const wordsLegend = `<b>How to read it</b> — the transliteration is the important bit, since kanji/kana can't be sounded out on sight. Vowels are short and pure (a‑i‑u‑e‑o, as in "father, machine, rule, met, so"); a bar or double vowel means hold it a beat longer.
+  <div class="rules">
+    <span><b>tsu</b> = quick "ts" (cats)</span>
+    <span><b>r</b> = soft, between "r" and "l"</span>
+    <span><b>fu</b> = light, breathy "f"</span>
+    <span><b>ei</b> = long "ay"</span>
+  </div>`;
+
+function renderWords(){
+  let html = `<div class="detail-date">PHRASEBOOK</div><div class="detail-title">Japanese</div>`;
+  html += `<div class="words-legend">${wordsLegend}</div>`;
+  wordCategories.forEach(cat => {
+    html += `<div class="block"><div class="block-label">${cat.title}</div>`;
+    cat.rows.forEach(r => {
+      html += `<div class="prow"><div class="pen">${r[0]}</div><div class="pnative"><div class="pjp">${r[1]}</div>${r[2] ? `<div class="proma">${r[2]}</div>` : ''}</div></div>`;
+    });
+    html += `</div>`;
+  });
+  return html;
+}
+
+// ---- timeline (proportional by day count per city) ----
+const timeline = document.getElementById('timeline');
+const cityCounts = {};
+days.forEach(d => cityCounts[d.city] = (cityCounts[d.city]||0) + 1);
+let lastCity = null;
+Object.keys(cityCounts).forEach(c => {}); // no-op, order comes from first appearance below
+const cityOrder = [];
+days.forEach(d => { if (!cityOrder.includes(d.city)) cityOrder.push(d.city); });
+cityOrder.forEach(c => {
+  const seg = document.createElement('div');
+  seg.className = `seg ${c}`;
+  seg.style.flex = cityCounts[c];
+  seg.textContent = CITY_NAMES[c].toUpperCase();
+  timeline.appendChild(seg);
+});
+
+// ---- day grid ----
+const week = document.getElementById('week');
+const dayEls = [];
+days.forEach(d => {
+  const el = document.createElement('div');
+  el.className = `day ${d.city}${d.travel ? ' travel' : ''}${d.trip ? ' trip' : ''}`;
+  el.innerHTML = `<div class="num">${d.num}</div><div class="mon">${d.month}</div><div class="dot"></div>`;
+  el.addEventListener('click', () => selectDay(d.id));
+  week.appendChild(el);
+  dayEls.push(el);
+});
+
+const panel = document.getElementById('panel');
+const linkWords = document.getElementById('linkWords');
+let selected = {type:'day', id:0};
+
+function updateSelection(){
+  dayEls.forEach((el, i) => el.classList.toggle('selected', selected.type === 'day' && selected.id === i));
+  linkWords.classList.toggle('selected', selected.type === 'words');
+}
+
+function selectDay(id){
+  selected = {type:'day', id};
+  updateSelection();
+  const d = days[id];
+  const prev = days[id-1];
+  const next = days[id+1];
+  panel.innerHTML = `
+    ${d.render()}
+    <div class="navrow">
+      <button class="navbtn ${prev ? '' : 'hidden'}" onclick="selectDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
+      <button class="navbtn next ${next ? '' : 'hidden'}" onclick="selectDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
+    </div>
+  `;
+}
+
+function selectWords(){
+  selected = {type:'words', id:'words'};
+  updateSelection();
+  panel.innerHTML = renderWords();
+}
+
+selectDay(0);
+
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+    || (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: light)').matches);
+  document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+});
+</script>
+
+</body>
+</html>
