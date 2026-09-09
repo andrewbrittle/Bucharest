@@ -195,7 +195,7 @@
   .prow .pen{ font-size:13.5px; color:var(--text-dim); flex-shrink:0; width:40%; padding-top:2px; }
   .prow .pnative{ text-align:right; }
   .prow .plat, .prow .pcyr{ font-family:'Fraunces', serif; font-size:16px; font-weight:500; }
-  .prow .ptranslit{ font-size:12px; color:var(--text-faint); font-style:italic; margin-top:2px; }
+  .prow .ptranslit{ font-size:12.5px; color:var(--text); opacity:.75; font-style:italic; margin-top:2px; }
   .words-ro .ptranslit b, .words-bg .ptranslit b{ font-style:normal; }
   .words-ro .ptranslit b{ color:var(--rust); }
   .words-bg .ptranslit b{ color:var(--gold); }
@@ -215,7 +215,13 @@
     display:grid;
     grid-template-columns:repeat(7,1fr);
     gap:6px;
-    margin-bottom:36px;
+    margin-bottom:22px;
+  }
+  .week-divider{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold) 85%, transparent);
+    opacity:.6;
+    margin-bottom:22px;
   }
   .day{
     aspect-ratio:1/1.18;
@@ -404,6 +410,22 @@
   .tip strong{ color:var(--gold); font-weight:600; }
   .tip + .tip{ margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
 
+  .maplink{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:15px;
+    height:15px;
+    margin-left:5px;
+    color:var(--text-faint);
+    vertical-align:middle;
+    opacity:.85;
+    transition:opacity .15s ease, color .15s ease, transform .15s ease;
+  }
+  .maplink svg{ width:100%; height:100%; fill:currentColor; }
+  .maplink:hover{ color:var(--gold); opacity:1; }
+  .maplink:active{ transform:scale(0.85); }
+
   .open-day{
     padding:30px 4px;
     text-align:center;
@@ -528,11 +550,17 @@
     <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
   </div>
   <div class="week" id="week"></div>
+  <div class="week-divider"></div>
 
   <div class="panel" id="panel"></div>
 </div>
 
 <script>
+const PIN_SVG = '<svg viewBox="0 0 24 24"><path d="M12 21s-7-7.05-7-12a7 7 0 1 1 14 0c0 4.95-7 12-7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>';
+function pin(query){
+  return `<a class="maplink" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}" target="_blank" rel="noopener" aria-label="Open in Google Maps">${PIN_SVG}</a>`;
+}
+
 const days = [
   {
     id:0, weekday:"Monday", date:"26 October", month:"OCT", num:26, city:"buc", travel:true,
@@ -554,7 +582,7 @@ const days = [
 
       <div class="block block--hotel">
         <div class="block-label">Stay</div>
-        <div class="hotel-name">Hotel Berthelot</div>
+        <div class="hotel-name">Hotel Berthelot${pin("Hotel Berthelot Bucharest")}</div>
         <div class="addr">Bulevardul Berthelot 9, Sector 1, Bucharest</div>
         <div class="hoursrow">
           <div><span>Check-in</span>from 14:00</div>
@@ -571,7 +599,7 @@ const days = [
       <div class="block">
         <div class="block-label">Suggested evening</div>
         <div class="plan"><div class="when">Settle in</div><div class="what"><strong>Check in, freshen up</strong><p>You'll land mid-afternoon and be at the hotel by ~16:30 — no need to rush straight out.</p></div></div>
-        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Old Town (Lipscani)</strong><p>Ten minutes' walk from the hotel. Wander the cobbled streets, pop into Stavropoleos Monastery if it's still open, and pick a restaurant for dinner — easy first night, nothing to plan ahead.</p></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Old Town (Lipscani)${pin("Lipscani Old Town Bucharest")}</strong><p>Ten minutes' walk from the hotel. Wander the cobbled streets, pop into Stavropoleos Monastery if it's still open, and pick a restaurant for dinner — easy first night, nothing to plan ahead.</p></div></div>
       </div>
     `
   },
@@ -585,10 +613,10 @@ const days = [
 
       <div class="block">
         <div class="block-label">Suggested day</div>
-        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Palace of the Parliament</strong><p>The must-see — second-largest administrative building in the world. Guided tours only; worth booking a slot in advance rather than turning up.</p><span class="hours">Open 9am–5pm daily</span></div></div>
-        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Calea Victoriei</strong><p>Walk the grand boulevard from the Palace area up past the Romanian Athenaeum — good for lunch along the way.</p></div></div>
-        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Herăstrău Park &amp; Village Museum</strong><p>A short taxi or metro ride north. The open-air museum of traditional Romanian houses is a nice change of pace, and the park itself is pleasant for a stroll by the lake.</p><span class="hours">Museum open 9am–5pm daily (winter hours by late Oct)</span></div></div>
-        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Option: concert at the Athenaeum</strong><p>There's a concert at the Romanian Athenaeum on this evening at 7pm that could be worth it — since it lines up with the day you're already in the centre for the Palace of the Parliament and Calea Victoriei. Dinner could shift earlier or later around it.</p></div></div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Palace of the Parliament${pin("Palace of the Parliament Bucharest")}</strong><p>The must-see — second-largest administrative building in the world. Guided tours only; worth booking a slot in advance rather than turning up.</p><span class="hours">Open 9am–5pm daily</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Calea Victoriei${pin("Calea Victoriei Bucharest")}</strong><p>Walk the grand boulevard from the Palace area up past the Romanian Athenaeum — good for lunch along the way.</p></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Herăstrău Park${pin("Herastrau Park Bucharest")} &amp; Village Museum${pin("Muzeul Satului Bucharest")}</strong><p>A short taxi or metro ride north. The open-air museum of traditional Romanian houses is a nice change of pace, and the park itself is pleasant for a stroll by the lake.</p><span class="hours">Museum open 9am–5pm daily (winter hours by late Oct)</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Option: concert at the Athenaeum${pin("Romanian Athenaeum Bucharest")}</strong><p>There's a concert at the Romanian Athenaeum on this evening at 7pm that could be worth it — since it lines up with the day you're already in the centre for the Palace of the Parliament and Calea Victoriei. Dinner could shift earlier or later around it.</p></div></div>
         <div class="plan"><div class="when">Evening</div><div class="what"><strong>Dinner back in the centre</strong><p>Head back towards Old Town or Calea Victoriei for dinner. Worth keeping an ear out too — Bucharest's smaller churches occasionally host organ or chamber recitals of an evening, a nice low-key alternative to a big concert hall if you spot a poster on the way past.</p></div></div>
       </div>
     `
@@ -603,10 +631,10 @@ const days = [
 
       <div class="block">
         <div class="block-label">Suggested day</div>
-        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Romanian Athenaeum — visit the building</strong><p>Best in the morning, when there's no rehearsal or concert restricting access. Self-guided entry to the foyer and the main hall, with its huge fresco of Romanian history circling the walls — worth it for the interior alone, no concert required.</p><span class="hours">Open ~9:30am–5:30pm, small entry fee (~10 RON); access may be limited if a rehearsal is on</span></div></div>
-        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Coffee in Old Town</strong><p>Maybe a browse through Cărturești Carusel, the six-storey bookshop housed in a restored 19th-century building nearby.</p><span class="hours">Cărturești Carusel open 10am–10pm Mon–Wed</span></div></div>
-        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Curtea Veche &amp; Manuc's Inn</strong><p>Worth knowing before you go: the Old Princely Court ruins themselves have been closed to the public for restoration for some years, so it's an exterior stop — the courtyard and Vlad the Impaler bust are visible from the street. Manuc's Inn right next door is open as normal, with a lovely covered courtyard for coffee or a late lunch.</p><span class="hours">Manuc's Inn open 8am–midnight (till 2am Fri/Sat)</span></div></div>
-        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Look for a concert in a smaller venue</strong><p>Rather than a big philharmonic night, Bucharest's churches often host organ or chamber recitals that are easy to stumble into — St. Joseph's Catholic Cathedral is literally on the same street as Hotel Berthelot, and the Anglican Church of the Resurrection runs an occasional recital series too. These aren't usually on the big ticketing sites — check posters at the door or local listings once you're there.</p></div></div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Romanian Athenaeum — visit the building${pin("Romanian Athenaeum Bucharest")}</strong><p>Best in the morning, when there's no rehearsal or concert restricting access. Self-guided entry to the foyer and the main hall, with its huge fresco of Romanian history circling the walls — worth it for the interior alone, no concert required.</p><span class="hours">Open ~9:30am–5:30pm, small entry fee (~10 RON); access may be limited if a rehearsal is on</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Coffee in Old Town</strong><p>Maybe a browse through Cărturești Carusel${pin("Carturesti Carusel Bucharest")}, the six-storey bookshop housed in a restored 19th-century building nearby.</p><span class="hours">Cărturești Carusel open 10am–10pm Mon–Wed</span></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Curtea Veche${pin("Curtea Veche Bucharest")} &amp; Manuc's Inn${pin("Hanul lui Manuc Bucharest")}</strong><p>Worth knowing before you go: the Old Princely Court ruins themselves have been closed to the public for restoration for some years, so it's an exterior stop — the courtyard and Vlad the Impaler bust are visible from the street. Manuc's Inn right next door is open as normal, with a lovely covered courtyard for coffee or a late lunch.</p><span class="hours">Manuc's Inn open 8am–midnight (till 2am Fri/Sat)</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Look for a concert in a smaller venue</strong><p>Rather than a big philharmonic night, Bucharest's churches often host organ or chamber recitals that are easy to stumble into — St. Joseph's Catholic Cathedral${pin("St Joseph Catholic Cathedral Bucharest")} is literally on the same street as Hotel Berthelot, and the Anglican Church of the Resurrection${pin("Anglican Church of the Resurrection Bucharest")} runs an occasional recital series too. These aren't usually on the big ticketing sites — check posters at the door or local listings once you're there.</p></div></div>
       </div>
     `
   },
@@ -637,7 +665,7 @@ const days = [
 
       <div class="block block--hotel">
         <div class="block-label">Stay</div>
-        <div class="hotel-name">Hotel Anel ★★★★★</div>
+        <div class="hotel-name">Hotel Anel ★★★★★${pin("Hotel Anel Sofia")}</div>
         <div class="addr">14 Todor Alexandrov Bul., Sofia 1303</div>
         <div class="hoursrow">
           <div><span>Check-in</span>from 14:00</div>
@@ -662,10 +690,10 @@ const days = [
 
       <div class="block">
         <div class="block-label">Suggested day</div>
-        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Alexander Nevsky Cathedral</strong><p>Sofia's centrepiece — the gold-domed cathedral. Go early before the tour groups; the antique market along the square outside is worth a browse too.</p><span class="hours">Cathedral open 7am–7pm daily, free entry</span></div></div>
-        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Ancient Serdica ruins</strong><p>Roman remains sitting right in the modern city centre, near Serdika metro station — an easy, short stop on the way to lunch.</p><span class="hours">Open access during metro hours (~6am–11pm), free</span></div></div>
-        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Vitosha Boulevard</strong><p>The main pedestrian street for shops, cafés, and people-watching — a relaxed way to fill the afternoon.</p></div></div>
-        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Dinner near Vitosha Boulevard</strong><p>Plenty of options right along the street or just off it. Sofia's churches — Sveta Nedelya Cathedral or the small St. George Rotunda among them — sometimes host organ or chamber recitals in the evening too; these tend to be advertised locally (posters at the door, programata.bg) rather than on the big ticketing sites, so worth a look once you're there.</p></div></div>
+        <div class="plan"><div class="when">Morning</div><div class="what"><strong>Alexander Nevsky Cathedral${pin("Alexander Nevsky Cathedral Sofia")}</strong><p>Sofia's centrepiece — the gold-domed cathedral. Go early before the tour groups; the antique market along the square outside is worth a browse too.</p><span class="hours">Cathedral open 7am–7pm daily, free entry</span></div></div>
+        <div class="plan"><div class="when">Midday</div><div class="what"><strong>Ancient Serdica ruins${pin("Ancient Serdica Sofia")}</strong><p>Roman remains sitting right in the modern city centre, near Serdika metro station — an easy, short stop on the way to lunch.</p><span class="hours">Open access during metro hours (~6am–11pm), free</span></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Vitosha Boulevard${pin("Vitosha Boulevard Sofia")}</strong><p>The main pedestrian street for shops, cafés, and people-watching — a relaxed way to fill the afternoon.</p></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Dinner near Vitosha Boulevard</strong><p>Plenty of options right along the street or just off it. Sofia's churches — Sveta Nedelya Cathedral${pin("Sveta Nedelya Cathedral Sofia")} or the small St. George Rotunda${pin("St George Rotunda Sofia")} among them — sometimes host organ or chamber recitals in the evening too; these tend to be advertised locally (posters at the door, programata.bg) rather than on the big ticketing sites, so worth a look once you're there.</p></div></div>
       </div>
     `
   },
@@ -679,8 +707,8 @@ const days = [
 
       <div class="block">
         <div class="block-label">Suggested day</div>
-        <div class="plan"><div class="when">Day trip</div><div class="what"><strong>Vitosha Mountain</strong><p>Right on Sofia's doorstep — worth the whole day if the weather's clear. Bus/gondola up for hiking trails and views back over the city; a good change of pace from museums and streets. Lucky timing: outside ski season the Simeonovo–Aleko cable car and chairlifts only run on Saturdays and Sundays, and this trip lands on a Saturday.</p><span class="hours">Cable car/chairlifts typically run ~9am–4:30pm, weekends only outside ski season</span></div></div>
-        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Spa at Hotel Anel</strong><p>Good timing after a day on the mountain — build in proper time to actually use it rather than rushing straight to dinner.</p></div></div>
+        <div class="plan"><div class="when">Day trip</div><div class="what"><strong>Vitosha Mountain${pin("Vitosha Mountain Sofia")}</strong><p>Right on Sofia's doorstep — worth the whole day if the weather's clear. Bus/gondola up for hiking trails and views back over the city; a good change of pace from museums and streets. Lucky timing: outside ski season the Simeonovo–Aleko cable car and chairlifts only run on Saturdays and Sundays, and this trip lands on a Saturday.</p><span class="hours">Cable car/chairlifts typically run ~9am–4:30pm, weekends only outside ski season</span></div></div>
+        <div class="plan"><div class="when">Evening</div><div class="what"><strong>Spa at Hotel Anel${pin("Hotel Anel Sofia")}</strong><p>Good timing after a day on the mountain — build in proper time to actually use it rather than rushing straight to dinner.</p></div></div>
       </div>
     `
   },
@@ -695,7 +723,7 @@ const days = [
       <div class="block">
         <div class="block-label">Suggested day</div>
         <div class="plan"><div class="when">Morning</div><div class="what"><strong>Check out by 12:00</strong><p>Ask the hotel to hold bags for the day — the airport transfer is quick, so no rush to keep them with you.</p></div></div>
-        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Anything you missed</strong><p>A full afternoon free — good for whatever didn't fit earlier in the week, or just a last wander down Vitosha Boulevard.</p></div></div>
+        <div class="plan"><div class="when">Afternoon</div><div class="what"><strong>Anything you missed</strong><p>A full afternoon free — good for whatever didn't fit earlier in the week, or just a last wander down Vitosha Boulevard${pin("Vitosha Boulevard Sofia")}.</p></div></div>
         <div class="plan"><div class="when">~17:00</div><div class="what"><strong>Head to the airport</strong><p>Plenty of margin for a 19:45 departure — metro from Serdika takes ~20 min.</p></div></div>
       </div>
 
