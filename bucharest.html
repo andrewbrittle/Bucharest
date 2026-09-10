@@ -36,6 +36,8 @@
     --text-faint:#7C8A94;
     --toggle-bg:#262F37;
     --toggle-icon:#D4A64C;
+    --dropdown-border:#6B7A87;
+    --dropdown-shadow:0 12px 32px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05);
     --flight-bg:#132A20;
     --flight-border:#3FA06B;
     --flight-icon:#7FDDA5;
@@ -70,6 +72,8 @@
     --text-faint:#7A6F60;
     --toggle-bg:#FFFFFF;
     --toggle-icon:#A9791F;
+    --dropdown-border:#E3D9C6;
+    --dropdown-shadow:0 8px 24px rgba(0,0,0,.18);
     --flight-bg:#E3F3EA;
     --flight-border:#2F7D4F;
     --flight-icon:#1F6E45;
@@ -690,11 +694,11 @@
     right:20px;
     width:250px;
     background:var(--surface);
-    border:1px solid var(--line);
+    border:1px solid var(--dropdown-border);
     border-radius:14px;
     padding:16px;
     z-index:21;
-    box-shadow:0 8px 24px rgba(0,0,0,.25);
+    box-shadow:var(--dropdown-shadow);
     display:none;
   }
   .fx-panel.open{ display:block; }
