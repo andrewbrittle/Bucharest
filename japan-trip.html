@@ -284,6 +284,40 @@
     html:not([data-theme="dark"]) .theme-toggle .icon-moon{ display:none; }
     html:not([data-theme="dark"]) .theme-toggle .icon-sun{ display:block; }
   }
+
+  .money-toggle{
+    position:fixed; top:22px; right:68px; width:38px; height:38px; border-radius:50%;
+    background:var(--toggle-bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:20; font-family:'Fraunces', serif; font-weight:600; font-size:16px; color:var(--toggle-icon);
+    transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+  }
+  .money-toggle:active{ transform:scale(0.92); }
+  .money-toggle.selected{ background:var(--kan); color:var(--bg); border-color:var(--kan); }
+
+  .money-panel{
+    position:fixed; top:68px; right:20px; width:min(320px, calc(100vw - 40px)); max-height:calc(100vh - 90px);
+    overflow-y:auto; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px;
+    z-index:25; box-shadow:0 14px 34px rgba(0,0,0,.35); animation:panelIn .2s ease;
+  }
+  .money-panel[hidden]{ display:none; }
+  .money-sub{ font-size:11px; color:var(--text-faint); margin:-6px 0 12px; line-height:1.4; }
+  .money-section + .money-section{ margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+
+  .rate-row{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Fraunces', serif; font-size:18px; font-weight:600; }
+  .rate-input{ width:76px; text-align:center; font-family:inherit; font-size:18px; font-weight:700; color:var(--text); background:var(--surface-hi); border:1px solid var(--line); border-radius:8px; padding:6px 4px; }
+  .rate-input:focus{ outline:none; border-color:var(--kan); }
+
+  .dir-toggle{ display:flex; gap:8px; margin-bottom:12px; justify-content:center; }
+  .dir-pill{ padding:6px 14px; border-radius:20px; border:1px solid var(--text-faint); background:none; color:var(--text-dim); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; transition:background .15s ease, color .15s ease, border-color .15s ease; }
+  .dir-pill.selected{ background:var(--kan); color:var(--bg); border-color:var(--kan); }
+
+  .amount-input{ display:block; width:100%; box-sizing:border-box; font-family:'Fraunces', serif; font-size:24px; font-weight:600; color:var(--text); background:var(--surface-hi); border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-bottom:12px; }
+  .amount-input:focus{ outline:none; border-color:var(--kan); }
+
+  .money-result{ background:var(--surface-hi); border-radius:10px; padding:14px; text-align:center; }
+  .result-main{ font-family:'Fraunces', serif; font-size:22px; font-weight:600; }
+  .result-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .result-divider{ height:1px; background:var(--line); margin:12px 0; }
 </style>
 </head>
 <body>
@@ -292,6 +326,35 @@
   <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
 </button>
+
+<button class="money-toggle" id="moneyToggle" type="button" aria-label="Currency converter">¥</button>
+<div class="money-panel" id="moneyPanel" hidden>
+  <div class="money-section">
+    <div class="block-label">Exchange rate</div>
+    <div class="money-sub">Approximate — edit to match what you're actually getting</div>
+    <div class="rate-row">
+      <span>£1 =</span>
+      <input type="number" id="rateInput" class="rate-input" inputmode="decimal" step="0.5">
+      <span>¥</span>
+    </div>
+  </div>
+  <div class="money-section">
+    <div class="block-label">Currency converter</div>
+    <div class="money-sub">Convert between yen and pounds, and see the tax-free price in one go</div>
+    <div class="dir-toggle">
+      <button type="button" class="dir-pill" id="dirYen2Gbp" data-dir="yen2gbp">¥ → £</button>
+      <button type="button" class="dir-pill" id="dirGbp2Yen" data-dir="gbp2yen">£ → ¥</button>
+    </div>
+    <input type="number" id="amountInput" class="amount-input" inputmode="decimal">
+    <div class="money-result">
+      <div class="result-main" id="resultMain"></div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="result-divider"></div>
+      <div class="result-main" id="taxFreeMain"></div>
+      <div class="result-sub" id="taxFreeSub"></div>
+    </div>
+  </div>
+</div>
 
 <div class="app">
   <div class="eyebrow">TRIP · 30 SEP – 14 OCT 2026</div>
@@ -1033,6 +1096,107 @@ themeToggle.addEventListener('click', () => {
   const next = isLight ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', next);
   try { localStorage.setItem('tripTheme', next); } catch(e){}
+});
+
+// ---- currency converter: exchange rate + direction persisted, amount + tax-free price live ----
+const RATE_KEY = 'tripExchangeRate';
+const DIR_KEY = 'tripMoneyDirection';
+let exchangeRate = 200;
+try { const r = parseFloat(localStorage.getItem(RATE_KEY)); if (!isNaN(r) && r > 0) exchangeRate = r; } catch(e){}
+let moneyDirection = 'yen2gbp';
+try { const d = localStorage.getItem(DIR_KEY); if (d === 'yen2gbp' || d === 'gbp2yen') moneyDirection = d; } catch(e){}
+
+const rateInput = document.getElementById('rateInput');
+const amountInput = document.getElementById('amountInput');
+const dirYen2Gbp = document.getElementById('dirYen2Gbp');
+const dirGbp2Yen = document.getElementById('dirGbp2Yen');
+const resultMain = document.getElementById('resultMain');
+const resultSub = document.getElementById('resultSub');
+const taxFreeMain = document.getElementById('taxFreeMain');
+const taxFreeSub = document.getElementById('taxFreeSub');
+const moneyToggle = document.getElementById('moneyToggle');
+const moneyPanel = document.getElementById('moneyPanel');
+
+function fmtGBP(n){ return '£' + n.toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtYen(n){ return '¥' + Math.round(n).toLocaleString('en-GB'); }
+function defaultAmountFor(dir){ return 0; }
+
+function updateDirButtons(){
+  dirYen2Gbp.classList.toggle('selected', moneyDirection === 'yen2gbp');
+  dirGbp2Yen.classList.toggle('selected', moneyDirection === 'gbp2yen');
+}
+
+function recalcMoney(){
+  const amount = parseFloat(amountInput.value);
+  if (isNaN(amount) || exchangeRate <= 0){
+    resultMain.textContent = '—'; resultSub.textContent = '';
+    taxFreeMain.textContent = '—'; taxFreeSub.textContent = '';
+    return;
+  }
+  let yenAmount, gbpAmount;
+  if (moneyDirection === 'yen2gbp'){
+    yenAmount = amount;
+    gbpAmount = amount / exchangeRate;
+    resultMain.textContent = fmtGBP(gbpAmount);
+    resultSub.textContent = fmtYen(yenAmount);
+  } else {
+    gbpAmount = amount;
+    yenAmount = amount * exchangeRate;
+    resultMain.textContent = fmtYen(yenAmount);
+    resultSub.textContent = fmtGBP(gbpAmount);
+  }
+  const taxFreeYen = yenAmount / 1.1; // Japan's 10% consumption tax removed
+  const taxFreeGbp = taxFreeYen / exchangeRate;
+  taxFreeMain.textContent = fmtYen(taxFreeYen);
+  taxFreeSub.textContent = `tax-free price (${fmtGBP(taxFreeGbp)})`;
+}
+
+rateInput.value = exchangeRate;
+amountInput.value = defaultAmountFor(moneyDirection);
+updateDirButtons();
+recalcMoney();
+
+rateInput.addEventListener('input', () => {
+  const v = parseFloat(rateInput.value);
+  if (!isNaN(v) && v > 0){
+    exchangeRate = v;
+    try { localStorage.setItem(RATE_KEY, String(v)); } catch(e){}
+    recalcMoney();
+  }
+});
+
+amountInput.addEventListener('input', recalcMoney);
+
+function setMoneyDirection(dir){
+  if (dir === moneyDirection) return;
+  const amount = parseFloat(amountInput.value);
+  let yenAmount, gbpAmount;
+  if (!isNaN(amount) && exchangeRate > 0){
+    if (moneyDirection === 'yen2gbp'){ yenAmount = amount; gbpAmount = amount / exchangeRate; }
+    else { gbpAmount = amount; yenAmount = amount * exchangeRate; }
+  }
+  moneyDirection = dir;
+  try { localStorage.setItem(DIR_KEY, dir); } catch(e){}
+  updateDirButtons();
+  amountInput.value = yenAmount !== undefined
+    ? (dir === 'yen2gbp' ? Math.round(yenAmount) : Math.round(gbpAmount * 100) / 100)
+    : defaultAmountFor(dir);
+  recalcMoney();
+}
+dirYen2Gbp.addEventListener('click', () => setMoneyDirection('yen2gbp'));
+dirGbp2Yen.addEventListener('click', () => setMoneyDirection('gbp2yen'));
+
+moneyToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isHidden = moneyPanel.hasAttribute('hidden');
+  if (isHidden){ moneyPanel.removeAttribute('hidden'); moneyToggle.classList.add('selected'); }
+  else { moneyPanel.setAttribute('hidden', ''); moneyToggle.classList.remove('selected'); }
+});
+document.addEventListener('click', (e) => {
+  if (moneyPanel.hasAttribute('hidden')) return;
+  if (moneyPanel.contains(e.target) || e.target === moneyToggle) return;
+  moneyPanel.setAttribute('hidden', '');
+  moneyToggle.classList.remove('selected');
 });
 </script>
 
