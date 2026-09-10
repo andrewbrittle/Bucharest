@@ -4,13 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Japan, Four Cities</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>
   (function(){
-    var m = location.search.match(/[?&]theme=(light|dark)/);
-    if (m) document.documentElement.setAttribute('data-theme', m[1]);
+    var theme = null;
+    try { theme = localStorage.getItem('tripTheme'); } catch(e){}
+    if (!theme){
+      var m = location.search.match(/[?&]theme=(light|dark)/);
+      if (m) theme = m[1];
+    }
+    if (theme) document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
   :root{
     --bg:#14181C;
@@ -30,6 +35,9 @@
 
     --transit-bg:#132A20; --transit-border:#3FA06B; --transit-icon:#7FDDA5;
     --hotel-bg:#241D14; --hotel-border:#B08838; --hotel-icon:#E4BE6F;
+
+    --status-blue:#5B9BD5; --status-skip:#6E7A85;
+    --cat-rose:#D98BA5; --cat-teal:#4FB3A9; --cat-wood:#B98553; --cat-sky:#6FC3D9; --cat-lavender:#B79AE0;
     color-scheme: dark;
   }
   @media (prefers-color-scheme: light){
@@ -45,6 +53,9 @@
 
       --transit-bg:#E3F3EA; --transit-border:#2F7D4F; --transit-icon:#1F6E45;
       --hotel-bg:#FBF2DF; --hotel-border:#A9791F; --hotel-icon:#7A5813;
+
+      --status-blue:#2F6EA8; --status-skip:#6B7075;
+      --cat-rose:#B23E63; --cat-teal:#1E7F73; --cat-wood:#8A5A2E; --cat-sky:#2C7A94; --cat-lavender:#6A4FA0;
       color-scheme: light;
     }
   }
@@ -60,6 +71,9 @@
 
     --transit-bg:#E3F3EA; --transit-border:#2F7D4F; --transit-icon:#1F6E45;
     --hotel-bg:#FBF2DF; --hotel-border:#A9791F; --hotel-icon:#7A5813;
+
+    --status-blue:#2F6EA8; --status-skip:#6B7075;
+    --cat-rose:#B23E63; --cat-teal:#1E7F73; --cat-wood:#8A5A2E; --cat-sky:#2C7A94; --cat-lavender:#6A4FA0;
     color-scheme: light;
   }
   html[data-theme="dark"]{
@@ -74,6 +88,9 @@
 
     --transit-bg:#132A20; --transit-border:#3FA06B; --transit-icon:#7FDDA5;
     --hotel-bg:#241D14; --hotel-border:#B08838; --hotel-icon:#E4BE6F;
+
+    --status-blue:#5B9BD5; --status-skip:#6E7A85;
+    --cat-rose:#D98BA5; --cat-teal:#4FB3A9; --cat-wood:#B98553; --cat-sky:#6FC3D9; --cat-lavender:#B79AE0;
     color-scheme: dark;
   }
 
@@ -110,6 +127,8 @@
   .timeline .seg.kyo{ background:var(--kyo-dim); color:var(--kyo-text); }
   .timeline .seg.tak{ background:var(--tak-dim); color:var(--tak-text); }
   .timeline .seg.kan{ background:var(--kan-dim); color:var(--kan-text); }
+  .citylink{ color:inherit; text-decoration:none; }
+  .citylink:hover{ text-decoration:underline; }
 
   .weekgrid{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
   .day{
@@ -189,18 +208,54 @@
   .maplink:hover{ color:var(--kan); opacity:1; }
   .maplink:active{ transform:scale(0.85); }
 
-  .plan{ display:flex; gap:13px; padding:12px 0; }
-  .plan:not(:last-child){ border-bottom:1px solid var(--line); }
-  .plan .when{ width:56px; flex-shrink:0; font-size:12.5px; color:var(--text-dim); padding-top:1px; }
+  .plan{ display:flex; gap:13px; }
+  .plan .when{ width:52px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:1px; }
+  .plan .when-label{ font-size:11px; color:var(--text-dim); text-align:center; line-height:1.25; }
   .plan .what strong{ display:block; font-size:15px; font-weight:600; margin-bottom:3px; }
   .plan .what p{ margin:0; font-size:13.5px; color:var(--text-dim); line-height:1.5; }
   .plan .what .alt{ display:block; margin-top:5px; font-size:12.5px; color:var(--text-faint); font-style:italic; }
   .plan .what .hours{ display:inline-block; margin-top:6px; font-size:12px; color:var(--kan); font-style:italic; }
   .plan .what .cash{ display:inline-block; margin-top:6px; margin-left:10px; font-size:12px; color:var(--text-faint); font-style:italic; }
 
-  .block--calm{ background:var(--kan-dim); border-color:var(--kan-border); display:flex; gap:12px; align-items:flex-start; }
-  .block--calm .calm-icon{ font-family:'Fraunces', serif; font-size:20px; color:var(--kan); line-height:1.3; flex-shrink:0; }
-  .block--calm .tip{ color:var(--kan-text); }
+  .section-label{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin:20px 0 8px; }
+  .section-label:first-child{ margin-top:0; }
+
+  .block--activity{ border-left:3px solid var(--status-blue); }
+  .block--activity.status-default{ border-left-color:var(--status-blue); }
+  .block--activity.status-done{ border-left-color:var(--transit-border); }
+  .block--activity.status-skipped{ border-left-color:var(--status-skip); }
+  .block--activity.is-dimmed .what{ opacity:.55; }
+
+  .status-marker{
+    width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; cursor:pointer;
+    border:1.5px solid; user-select:none; flex-shrink:0;
+    transition:transform .15s ease;
+  }
+  .status-marker:active{ transform:scale(0.85); }
+  .status-marker.state-default{ border-color:var(--status-blue); color:var(--status-blue); background:transparent; }
+  .status-marker.state-done{ border-color:var(--transit-border); background:var(--transit-border); color:#fff; }
+  .status-marker.state-skipped{ border-color:var(--status-skip); background:var(--status-skip); color:#fff; }
+
+  .proverb{
+    background:var(--surface);
+    border:1px solid var(--pc);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:12px;
+    opacity:.88;
+  }
+  .proverb.cat-rose{ --pc:var(--cat-rose); }
+  .proverb.cat-teal{ --pc:var(--cat-teal); }
+  .proverb.cat-wood{ --pc:var(--cat-wood); }
+  .proverb.cat-sky{ --pc:var(--cat-sky); }
+  .proverb.cat-lavender{ --pc:var(--cat-lavender); }
+  .proverb-cat{ font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--pc); font-weight:600; opacity:.85; margin-bottom:7px; }
+  .proverb-native{ font-family:'Fraunces', serif; font-size:14.5px; font-weight:500; color:var(--text-dim); margin-bottom:2px; }
+  .proverb-phonetic{ font-size:11.5px; font-style:italic; font-weight:500; color:var(--text-dim); margin-bottom:7px; }
+  .proverb-meaning{ font-size:12px; color:var(--text-dim); font-style:italic; font-weight:500; margin-bottom:7px; }
+  .proverb-advice{ font-size:12.5px; color:var(--text-dim); line-height:1.5; padding-top:7px; border-top:1px solid var(--line); }
 
   .navrow{ display:flex; justify-content:space-between; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
   .navbtn{ background:none; border:none; color:var(--text-dim); font-family:'IBM Plex Sans', sans-serif; font-size:14px; cursor:pointer; display:flex; flex-direction:column; gap:2px; }
@@ -297,387 +352,519 @@ function transitBlock(label, legs){
   return `<div class="block block--transit"><div class="block-label">${label}</div>${legsHtml}</div>`;
 }
 
-function planBlock(label, rows){
-  const rowsHtml = rows.map(r => `
-    <div class="plan">
-      <div class="when">${r.when}</div>
-      <div class="what">
-        <strong>${r.what}</strong>
-        ${r.p ? `<p>${r.p}</p>` : ''}
-        ${r.alt ? `<span class="alt">Alternatively: ${r.alt}</span>` : ''}
-        ${r.hours ? `<span class="hours">${r.hours}</span>` : ''}
-        ${r.cash ? `<span class="cash">💴 ${r.cash}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
-  return `<div class="block"><div class="block-label">${label}</div>${rowsHtml}</div>`;
-}
-
 function tipBlock(label, tips){
   return `<div class="block"><div class="block-label">${label}</div>${tips.map(t=>`<div class="tip">${t}</div>`).join('')}</div>`;
 }
 
-function calmBlock(text){
-  return `<div class="block block--calm"><div class="calm-icon">◡</div><div class="tip">${text}</div></div>`;
+// ---- activity status: default (blue) / done (green) / skipped (grey), persisted ----
+let statusStore = {};
+try { statusStore = JSON.parse(localStorage.getItem('tripActivityStatus') || '{}'); } catch(e){ statusStore = {}; }
+function getStatus(pid){ return statusStore[pid] || 'default'; }
+function saveStatusStore(){ try { localStorage.setItem('tripActivityStatus', JSON.stringify(statusStore)); } catch(e){} }
+
+function activityCard(pid, when, titleHtml, bodyText, opts){
+  opts = opts || {};
+  const status = getStatus(pid);
+  const dimClass = status !== 'default' ? ' is-dimmed' : '';
+  const glyphs = { default:'–', done:'✓', skipped:'✕' };
+  return `<div class="block block--activity status-${status}${dimClass}" data-pid="${pid}">
+      <div class="plan">
+        <div class="when">
+          <div class="status-marker state-${status}" onclick="toggleStatus('${pid}')">${glyphs[status]}</div>
+          ${when ? `<div class="when-label">${when}</div>` : ''}
+        </div>
+        <div class="what">
+          <strong>${titleHtml}</strong>
+          ${bodyText ? `<p>${bodyText}</p>` : ''}
+          ${opts.alt ? `<span class="alt">Alternatively: ${opts.alt}</span>` : ''}
+          ${opts.hours ? `<span class="hours">${opts.hours}</span>` : ''}
+          ${opts.cash ? `<span class="cash">💴 ${opts.cash}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleStatus(pid){
+  const order = ['default','done','skipped'];
+  const next = order[(order.indexOf(getStatus(pid)) + 1) % order.length];
+  statusStore[pid] = next;
+  saveStatusStore();
+  const glyphs = { default:'–', done:'✓', skipped:'✕' };
+  const cardEl = document.querySelector(`[data-pid="${pid}"]`);
+  if (!cardEl) return;
+  cardEl.classList.remove('status-default', 'status-done', 'status-skipped');
+  cardEl.classList.add(`status-${next}`);
+  cardEl.classList.toggle('is-dimmed', next !== 'default');
+  const marker = cardEl.querySelector('.status-marker');
+  marker.className = `status-marker state-${next}`;
+  marker.textContent = glyphs[next];
+}
+
+// ---- calming proverb cards: randomised per view, not persisted ----
+function categoryClass(category){
+  if (category.includes("Acceptance")) return "cat-rose";
+  if (category.includes("Nature") || category.includes("Impermanence")) return "cat-teal";
+  if (category.includes("Mindset") || category.includes("Inner Stillness")) return "cat-wood";
+  if (category.includes("Resilience") || category.includes("Subtle Strength")) return "cat-sky";
+  if (category.includes("Harmony") || category.includes("Balance")) return "cat-lavender";
+  return "cat-rose";
+}
+
+function proverbCardHtml(p){
+  const cls = categoryClass(p.category);
+  return `<div class="proverb ${cls}">
+        <div class="proverb-cat">${p.category}</div>
+        <div class="proverb-native">${p.saying}</div>
+        <div class="proverb-phonetic">${p.saying_phonetic}</div>
+        <div class="proverb-meaning">"${p.meaning}"</div>
+        <div class="proverb-advice">${p.advice}</div>
+      </div>`;
+}
+
+function randomProverb(){ return calmingSayings[Math.floor(Math.random() * calmingSayings.length)]; }
+
+// ---- day content assembly: fixed blocks + card sections, with two proverb cards spliced in ----
+function renderDayWithProverbs(headerHtml, sections){
+  const flat = [];
+  const cardPositions = [];
+  sections.forEach(sec => {
+    if (sec.fixed !== undefined){ flat.push(sec.fixed); return; }
+    flat.push(`<div class="section-label">${sec.label}</div>`);
+    sec.cards.forEach(c => { cardPositions.push(flat.length); flat.push(c); });
+  });
+  const result = flat.slice();
+  if (cardPositions.length > 1){
+    const insertPos = cardPositions[1 + Math.floor(Math.random() * (cardPositions.length - 1))];
+    result.splice(insertPos, 0, proverbCardHtml(randomProverb()));
+  }
+  result.push(proverbCardHtml(randomProverb()));
+  return headerHtml + result.join('');
 }
 
 // ---- trip data ----
 const CITY_NAMES = { tok:"Tokyo", kyo:"Kyoto", tak:"Takayama", kan:"Kanazawa" };
+const CITY_WIKI = {
+  tok:"https://en.wikipedia.org/wiki/Tokyo",
+  kyo:"https://en.wikipedia.org/wiki/Kyoto",
+  tak:"https://en.wikipedia.org/wiki/Takayama,_Gifu",
+  kan:"https://en.wikipedia.org/wiki/Kanazawa"
+};
+
+const calmingSayingsRaw = [
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Shikata ga nai", "saying_kanji_kana": "仕方がない", "meaning": "It cannot be helped.", "advice": "Focus your energy on what you can change, not what you cannot." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Nana korobi ya oki", "saying_kanji_kana": "七転び八起き", "meaning": "Fall seven times, stand up eight.", "advice": "True peace comes from knowing you can always rebuild." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Sarumono wa ozu, kitarmono wa kobamazu", "saying_kanji_kana": "去る者は追わず、来る者は拒まず", "meaning": "Do not chase those who leave, do not reject those who arrive.", "advice": "Flow with life's social currents without resistance." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Meido no miyage", "saying_kanji_kana": "冥土の土産", "meaning": "A souvenir from life.", "advice": "View your current struggles as just another interesting story for the future." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Akirame wa kanjin", "saying_kanji_kana": "諦めは肝心", "meaning": "Acceptance is vital.", "advice": "Giving up on the unchangeable brings immediate peace." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Omoitatta ga kikitsujitsu", "saying_kanji_kana": "思い立ったが吉日", "meaning": "The day you decide to do it is your lucky day.", "advice": "Don't stress about the past or the perfect timing." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Mizu ni nagasu", "saying_kanji_kana": "水に流す", "meaning": "Let it flow in the water.", "advice": "Forgive, forget, and let past grievances wash away." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Asahi wa nishi kara noboranai", "saying_kanji_kana": "朝日は西から昇らない", "meaning": "The morning sun does not rise in the west.", "advice": "Accept the natural, unchangeable laws of reality." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Kouka fukutsure", "saying_kanji_kana": "巧遅は拙速に如かず", "meaning": "Better to be slow and deliberate than fast and sloppy.", "advice": "Remind yourself to breathe and slow down." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Un wo ten ni makaceru", "saying_kanji_kana": "運を天に任せる", "meaning": "Leave your fate to heaven.", "advice": "Do your best, then let go of the outcome entirely." },
+  { "category": "🌸 Acceptance & Letting Go", "saying_romaji": "Shouganai", "saying_kanji_kana": "しょうがない", "meaning": "There is no use crying over it.", "advice": "Accept the current reality as it is to reclaim your peace." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Mono no aware", "saying_kanji_kana": "物の哀れ", "meaning": "The beautiful pathos of things.", "advice": "Finding deep peace in the fleeting nature of life and beauty." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Kachou fugetsu", "saying_kanji_kana": "花鳥風月", "meaning": "Flower, bird, wind, moon.", "advice": "Experience the peace of the universe by immersing yourself in nature." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Ukiyo", "saying_kanji_kana": "浮世", "meaning": "The floating world.", "advice": "Live detached from life's anxieties, drifting calmly through its changes." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Sanka suimei", "saying_kanji_kana": "山華水明", "meaning": "Purple mountains, clear streams.", "advice": "A reminder of the pristine, untouched quiet of the natural world." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Seifu meigetsu", "saying_kanji_kana": "清風明月", "meaning": "Pure wind and a bright moon.", "advice": "True peace requires zero wealth or material possessions." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Shiki oriori", "saying_kanji_kana": "四季折々", "meaning": "Season by season.", "advice": "Trust that your current emotional winter will naturally shift into spring." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Taika bansei", "saying_kanji_kana": "大器晩成", "meaning": "Great talents mature late.", "advice": "Do not rush your growth; nature never rushes, yet everything gets done." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Chiri mo tsumoreba yama to naru", "saying_kanji_kana": "ちりもつもればやまとなる", "meaning": "Even dust, when piled up, becomes a mountain.", "advice": "Calmly make small daily progress." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Kachou fugetsu ni asobu", "saying_kanji_kana": "花鳥風月に遊ぶ", "meaning": "Play with the flowers, birds, wind, and moon.", "advice": "Find tranquility by becoming a spectator of nature." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Keichou fubi", "saying_kanji_kana": "桂長風微", "meaning": "The cassia tree grows tall while the wind blows gently.", "advice": "Trust that peaceful environments nurture deep growth." },
+  { "category": "🌿 Nature & Impermanence (Mono no Aware)", "saying_romaji": "Mizu wa hounen ni shitagau", "saying_kanji_kana": "水は方円に随う", "meaning": "Water shapes itself to any container.", "advice": "Be like water and adapt effortlessly to your surroundings." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Wabi-sabi", "saying_kanji_kana": "侘寂", "meaning": "Perfect imperfection.", "advice": "Finding perfect peace in imperfection, incompletion, and the simple things." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Ichigo ichie", "saying_kanji_kana": "一期一会", "meaning": "One time, one meeting.", "advice": "Treasure this exact, unrepeatable moment without worrying about the next." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Heijoshin", "saying_kanji_kana": "平常心", "meaning": "Presence of mind.", "advice": "Maintain a calm, everyday spirit regardless of the chaos surrounding you." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Shinra bansho", "saying_kanji_kana": "森羅万象", "meaning": "All things in nature.", "advice": "Remember how small your current worry is in the grand scope of the universe." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Fudoshin", "saying_kanji_kana": "不動心", "meaning": "Immovable mind.", "advice": "Cultivate a heart that cannot be shaken by external storms." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Meikyo shisui", "saying_kanji_kana": "明鏡止水", "meaning": "Clear mirror, still water.", "advice": "A mind kept so calm and clear that it perfectly reflects reality." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Chisoku", "saying_kanji_kana": "知足", "meaning": "Know what is enough.", "advice": "True wealth and tranquility belong to those who are content with what they have." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Yutori", "saying_kanji_kana": "ゆとり", "meaning": "Living with spaciousness.", "advice": "Leaving breathing room in your schedule, mind, and life." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Shoujin ketsujou", "saying_kanji_kana": "精進潔斎", "meaning": "Purification of the mind and body.", "advice": "Intentionally clearing away mental clutter to restore your inner sanctuary." },
+  { "category": "🍵 Mindset & Inner Stillness", "saying_romaji": "Anjin ritsumei", "saying_kanji_kana": "安心立命", "meaning": "Finding absolute peace of mind through faith or philosophy.", "advice": "Live completely free from existential anxiety." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Yanagi ni yukioro nashi", "saying_kanji_kana": "柳に雪折れなし", "meaning": "The willow branches do not break under the snow.", "advice": "Yielding and being flexible is your greatest strength." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Ame hatte ji katamaru", "saying_kanji_kana": "あめふってじかたまる", "meaning": "After rain, the ground hardens.", "advice": "Adversity only serves to make your foundation more stable." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Gaman", "saying_kanji_kana": "我慢", "meaning": "Enduring the seemingly unbearable with patience and dignity.", "advice": "Keep your composure through internal discipline." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Jinsei bunkuji ma ga uma", "saying_kanji_kana": "人間の万事塞翁が馬", "meaning": "Life is like the horse of an old man at the frontier.", "advice": "Bad luck can be good luck in disguise, so stay even-tempered." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Shunba toufu", "saying_kanji_kana": "駿馬東風", "meaning": "Like the east wind blowing past a swift horse.", "advice": "Let criticisms and worries brush past you without leaving a scratch." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Naiteru mizu ni sakana sumu", "saying_kanji_kana": "泣いてる水に魚住む", "meaning": "Fish live even in weeping waters.", "advice": "Life can still thrive and be beautiful during sad times." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Taiki seijaku", "saying_kanji_kana": "大気静寂", "meaning": "Deep atmosphere, profound silence.", "advice": "Cultivate a quiet, vast presence that cannot be easily disturbed." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Ishin-denshin", "saying_kanji_kana": "以心伝心", "meaning": "Heart to heart communication.", "advice": "Quietly understanding others without the need for loud, exhausting words." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Toko no haru", "saying_kanji_kana": "常個の春", "meaning": "An eternal spring within.", "advice": "Cultivating a mindset so warm that it stays calm even during life's winters." },
+  { "category": "🪵 Resilience & Subtle Strength", "saying_romaji": "Fuuha wo shinogu", "saying_kanji_kana": "風波を凌ぐ", "meaning": "Weathering the wind and waves.", "advice": "Remind yourself that you have the quiet strength to ride out any temporary storm." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Wa", "saying_kanji_kana": "和", "meaning": "Harmony.", "advice": "Living in pursuit of harmony, balance, and peaceful coexistence with all things." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Juu noku gou wo seisu", "saying_kanji_kana": "柔よく剛を制す", "meaning": "Softness overcomes hardness.", "advice": "Gentleness is far more powerful than force." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "In-ou", "saying_kanji_kana": "陰応", "meaning": "The quiet harmony of yin and yang.", "advice": "Accepting that life requires a balance of rest and action, dark and light." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Ikigai", "saying_kanji_kana": "生き甲斐", "meaning": "A reason for being.", "advice": "Finding peace by focusing purely on what brings you quiet joy and purpose." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Shizun de mo mata ukabu", "saying_kanji_kana": "沈んでもまた浮かぶ", "meaning": "Even if you sink, you will float to the top again.", "advice": "Trust the natural buoyancy of your spirit." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Seiseitsuatsatsu", "saying_kanji_kana": "清々颯々", "meaning": "Pure, fresh, and rustling like the wind.", "advice": "The feeling of a mind cleared of clutter." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Onryo jihitsu", "saying_kanji_kana": "穏良慈筆", "meaning": "Gentle, kind, and compassionate.", "advice": "Treat your own mistakes with this exact mindset." },
+  { "category": "🌊 Harmony & Balance", "saying_romaji": "Yugen", "saying_kanji_kana": "幽玄", "meaning": "A profound, mysterious sense of the beauty of the universe.", "advice": "Leaves your daily anxieties feeling distant and small." }
+];
+const calmingSayings = calmingSayingsRaw.map(p => ({...p, saying: p.saying_kanji_kana, saying_phonetic: p.saying_romaji}));
 
 const days = [
 { id:0, date:"30 September", weekday:"Wednesday", month:"SEP", num:30, city:"tok", travel:true,
   title:"Home → Tokyo",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Wednesday, 30 September</div>
     <div class="detail-title">Home → Tokyo</div>
     <span class="badge tok">ARRIVAL DAY · TOKYO</span>
-    ${hotelBlock("Tokyo hotel", null, null, "3:00pm", null, "Not named in the source plan yet. “Head back to hotel to officially check in, rest until undisclosed time.”")}
-    ${planBlock("Morning", [
-      {when:"", what:"Arrive Haneda"+pin("Haneda Airport"), p:"Collect bags — immigration/customs, train to hotel and drop bags at hotel."},
-      {when:"", what:"Tokyo National Museum"+pin("Tokyo National Museum"), p:"Huge collection covering samurai armor, ceramics, and Buddhist art.", hours:"9:30–17:00 (Fri/Sat to 20:00) · closed Mon · ¥1,000 (~£5)"}
-    ])}
-    ${planBlock("Early Afternoon", [
-      {when:"", what:"National Museum of Western Art"+pin("National Museum of Western Art Tokyo"), p:"Monet, Rodin, and other Western masters — Le Corbusier‑designed building.", hours:"9:30–17:30 (Fri/Sat to 20:00) · closed Mon · ¥500 (~£2.50)"},
-      {when:"Lunch", what:"Ueno"+pin("Ueno Park Tokyo"), p:"Grab something in the park or Museum cafes."},
-      {when:"", what:"Shitamachi Museum"+pin("Shitamachi Museum Tokyo"), p:"Small, atmospheric recreation of old Tokyo shopping street life.", hours:"9:30–16:30, last entry 16:00 · closed Mon · ¥300 (~£1.50)", cash:"small museum — cash handy as backup"}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Asakusa & Sensō‑ji Temple"+pin("Sensoji Temple Asakusa Tokyo")+" (evening stroll)", p:"Easy, low‑key evening close to Ueno — Nakamise street for snacks, early night to fight jet lag.", hours:"Main hall 6:30–17:00 in October · grounds open 24h · free", cash:"Nakamise stalls and fortune-slip (omikuji) boxes are cash/coin-based"}
-    ])}
-    ${calmBlock("However today goes, the hardest part — the journey itself — is already behind you by the time you're reading this. Japan's trains and signage are some of the most tourist-friendly anywhere; you really can't get too lost.")}
-  `
+  `, [
+    {fixed: hotelBlock("Tokyo hotel", null, null, "3:00pm", null, "Not named in the source plan yet. “Head back to hotel to officially check in, rest until undisclosed time.”")},
+    {label:"Morning", cards:[
+      activityCard("d0a0", "", "Arrive Haneda"+pin("Haneda Airport"), "Collect bags — immigration/customs, train to hotel and drop bags at hotel."),
+      activityCard("d0a1", "", "Tokyo National Museum"+pin("Tokyo National Museum"), "Huge collection covering samurai armor, ceramics, and Buddhist art.", {hours:"9:30–17:00 (Fri/Sat to 20:00) · closed Mon · ¥1,000 (~£5)"})
+    ]},
+    {label:"Early Afternoon", cards:[
+      activityCard("d0a2", "", "National Museum of Western Art"+pin("National Museum of Western Art Tokyo"), "Monet, Rodin, and other Western masters — Le Corbusier‑designed building.", {hours:"9:30–17:30 (Fri/Sat to 20:00) · closed Mon · ¥500 (~£2.50)"}),
+      activityCard("d0a3", "Lunch", "Ueno"+pin("Ueno Park Tokyo"), "Grab something in the park or Museum cafes."),
+      activityCard("d0a4", "", "Shitamachi Museum"+pin("Shitamachi Museum Tokyo"), "Small, atmospheric recreation of old Tokyo shopping street life.", {hours:"9:30–16:30, last entry 16:00 · closed Mon · ¥300 (~£1.50)", cash:"small museum — cash handy as backup"})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d0a5", "", "Asakusa & Sensō‑ji Temple"+pin("Sensoji Temple Asakusa Tokyo")+" (evening stroll)", "Easy, low‑key evening close to Ueno — Nakamise street for snacks, early night to fight jet lag.", {hours:"Main hall 6:30–17:00 in October · grounds open 24h · free", cash:"Nakamise stalls and fortune-slip (omikuji) boxes are cash/coin-based"})
+    ]}
+  ])
 },
 { id:1, date:"1 October", weekday:"Thursday", month:"OCT", num:1, city:"tok", travel:false,
   title:"Tokyo",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Thursday, 1 October</div>
     <div class="detail-title">In Tokyo</div>
     <span class="badge tok">TOKYO</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Tokyo Station"+pin("Tokyo Station Marunouchi")+" (Marunouchi façade)", p:"Historic red‑brick Marunouchi façade, restored to its 1914 look. Free to view any time."},
-      {when:"", what:"Imperial Palace East Gardens"+pin("Imperial Palace East Gardens Tokyo"), p:"Peaceful gardens, free entry, right by the station.", hours:"October: 9:00–16:30, last entry 16:00 · closed Mon & Fri · free"}
-    ])}
-    ${planBlock("Early Afternoon", [
-      {when:"", what:"Zōjō‑ji Temple"+pin("Zojoji Temple Tokyo"), p:"Historic temple, main gate for the Tokugawa shoguns, right next to Tokyo Tower.", hours:"Main hall ~6:00–17:30 · grounds free"},
-      {when:"", what:"Tokyo Tower"+pin("Tokyo Tower")+" (exterior/surroundings)", p:"Admiring it from the park and surroundings — nice spot for a picnic. Maybe go up if we feel like it.", hours:"Main Deck 9:00–23:00, last entry 22:30 · ¥3,300 online / ¥3,500 on the day (~£16.50–£17.50) — free to admire from outside"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Atago Jinja"+pin("Atago Jinja Tokyo"), p:"Small hilltop shrine famous for its steep ‘Success Stairs’.", cash:"small shrine — cash for omamori/goshuin"},
-      {when:"", what:"Mori Art Museum"+pin("Mori Art Museum Roppongi Hills"), p:"Contemporary art with panoramic city views from Roppongi Hills. Head back to hotel and rest.", hours:"10:00–22:00 daily, Tue to 17:00 · ~¥2,000–2,200 (~£10–£11)"}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Shinjuku night life"+pin("Shinjuku Tokyo"), p:"Gay bars: Eagle Tokyo Blue / Dragon Man / Kaiser."}
-    ])}
-  `
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d1a0", "", "Tokyo Station"+pin("Tokyo Station Marunouchi")+" (Marunouchi façade)", "Historic red‑brick Marunouchi façade, restored to its 1914 look. Free to view any time."),
+      activityCard("d1a1", "", "Imperial Palace East Gardens"+pin("Imperial Palace East Gardens Tokyo"), "Peaceful gardens, free entry, right by the station.", {hours:"October: 9:00–16:30, last entry 16:00 · closed Mon & Fri · free"})
+    ]},
+    {label:"Early Afternoon", cards:[
+      activityCard("d1a2", "", "Zōjō‑ji Temple"+pin("Zojoji Temple Tokyo"), "Historic temple, main gate for the Tokugawa shoguns, right next to Tokyo Tower.", {hours:"Main hall ~6:00–17:30 · grounds free"}),
+      activityCard("d1a3", "", "Tokyo Tower"+pin("Tokyo Tower")+" (exterior/surroundings)", "Admiring it from the park and surroundings — nice spot for a picnic. Maybe go up if we feel like it.", {hours:"Main Deck 9:00–23:00, last entry 22:30 · ¥3,300 online / ¥3,500 on the day (~£16.50–£17.50) — free to admire from outside"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d1a4", "", "Atago Jinja"+pin("Atago Jinja Tokyo"), "Small hilltop shrine famous for its steep ‘Success Stairs’.", {cash:"small shrine — cash for omamori/goshuin"}),
+      activityCard("d1a5", "", "Mori Art Museum"+pin("Mori Art Museum Roppongi Hills"), "Contemporary art with panoramic city views from Roppongi Hills. Head back to hotel and rest.", {hours:"10:00–22:00 daily, Tue to 17:00 · ~¥2,000–2,200 (~£10–£11)"})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d1a6", "", "Shinjuku night life"+pin("Shinjuku Tokyo"), "Gay bars: Eagle Tokyo Blue / Dragon Man / Kaiser.")
+    ]}
+  ])
 },
 { id:2, date:"2 October", weekday:"Friday", month:"OCT", num:2, city:"tok", travel:false,
   title:"Tokyo",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Friday, 2 October</div>
     <div class="detail-title">In Tokyo</div>
     <span class="badge tok">TOKYO</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Tokyo Metropolitan Government Building"+pin("Tokyo Metropolitan Government Building"), p:"Free observation decks, best visibility earlier in the day before haze builds.", hours:"South deck 9:30–22:00, closed 1st/3rd Tue · North deck 9:30–17:30, closed 2nd/4th Mon · free"},
-      {when:"", what:"Meiji Shrine"+pin("Meiji Shrine Tokyo"), p:"Peaceful forested shrine, best visited before crowds.", hours:"Gates follow sunrise/sunset — roughly 5:40–16:40 in October · grounds free · Inner Garden ¥500 (~£2.50)"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Yoyogi Park"+pin("Yoyogi Park Tokyo"), p:"Wide green park right next to the shrine, good spot to stretch legs."},
-      {when:"", what:"Harajuku — Takeshita Street"+pin("Takeshita Street Harajuku"), p:"Quirky shops, crepes, youth fashion."},
-      {when:"", what:"Check energy/time levels — follow for the following options", p:"Nezu museum"+pin("Nezu Museum Tokyo")+" — Japanese & East Asian art museum with pre‑modern pieces in various media.", alt:"Omotesandō & Cat Street"+pin("Omotesando Street Tokyo")+" — upscale, tree‑lined shopping street connecting to Shibuya (optional). Shibuya Crossing"+pin("Shibuya Crossing Tokyo")+" — up to 3,000 people crossing at once during peak hours (optional)."}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Shibuya & Shinjuku at night"+pin("Shibuya Tokyo"), p:""}
-    ])}
-  `
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d2a0", "", "Tokyo Metropolitan Government Building"+pin("Tokyo Metropolitan Government Building"), "Free observation decks, best visibility earlier in the day before haze builds.", {hours:"South deck 9:30–22:00, closed 1st/3rd Tue · North deck 9:30–17:30, closed 2nd/4th Mon · free"}),
+      activityCard("d2a1", "", "Meiji Shrine"+pin("Meiji Shrine Tokyo"), "Peaceful forested shrine, best visited before crowds.", {hours:"Gates follow sunrise/sunset — roughly 5:40–16:40 in October · grounds free · Inner Garden ¥500 (~£2.50)"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d2a2", "", "Yoyogi Park"+pin("Yoyogi Park Tokyo"), "Wide green park right next to the shrine, good spot to stretch legs."),
+      activityCard("d2a3", "", "Harajuku — Takeshita Street"+pin("Takeshita Street Harajuku"), "Quirky shops, crepes, youth fashion."),
+      activityCard("d2a4", "", "Check energy/time levels — follow for the following options", "Nezu museum"+pin("Nezu Museum Tokyo")+" — Japanese & East Asian art museum with pre‑modern pieces in various media.", {alt:"Omotesandō & Cat Street"+pin("Omotesando Street Tokyo")+" — upscale, tree‑lined shopping street connecting to Shibuya (optional). Shibuya Crossing"+pin("Shibuya Crossing Tokyo")+" — up to 3,000 people crossing at once during peak hours (optional)."})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d2a5", "", "Shibuya & Shinjuku at night"+pin("Shibuya Tokyo"), "")
+    ]}
+  ])
 },
 { id:3, date:"3 October", weekday:"Saturday", month:"OCT", num:3, city:"tok", travel:false,
   title:"Tokyo",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Saturday, 3 October</div>
     <div class="detail-title">In Tokyo</div>
     <span class="badge tok">TOKYO</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Hie Shrine"+pin("Hie Shrine Tokyo"), p:"Historic shrine with a striking vermillion torii tunnel and city views.", hours:"Grounds free, generally open daily"},
-      {when:"", what:"Toyokawa Inari Betsuin"+pin("Toyokawa Inari Betsuin Tokyo"), p:"A few minutes' walk from Hie Shrine, known for its fox statues."}
-    ])}
-    ${planBlock("Midday", [
-      {when:"", what:"Edo‑Tokyo Museum"+pin("Edo-Tokyo Museum Ryogoku"), p:"Across town to Ryōgoku — immersive exhibits on old Edo and Tokyo's history. Reopened 31 March 2026 after its long renovation closure — confirmed open for this trip.", hours:"9:30–17:30 (Sat to 19:30) · closed Mon · ¥800 (~£4)"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Sumida Hokusai Museum"+pin("Sumida Hokusai Museum"), p:"Right by the Edo‑Tokyo Museum, dedicated to the ukiyo‑e master.", hours:"9:30–17:30, last entry 17:00 · closed Mon · ¥400 (~£2)"}
-    ])}
-    ${planBlock("Late afternoon", [
-      {when:"", what:"Tokyo Skytree"+pin("Tokyo Skytree"), p:"Short hop from Ryōgoku — great views, no need to go up if already done elsewhere.", hours:"10:00–22:00, last admission 21:00 · Tembo Deck ¥1,800–2,300 (~£9–£11.50) depending on day/time"}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Boat to Odaiba"+pin("Odaiba Tokyo"), p:"Water bus from the pier near Asakusa, scenic ride along the Sumida River.", hours:"~6 sailings/day (roughly 10:00, 11:00, 13:10, 14:10, 15:30, 16:10) — worth checking the exact times before heading to the pier · ¥2,000 one‑way (~£10)"}
-    ])}
-  `
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d3a0", "", "Hie Shrine"+pin("Hie Shrine Tokyo"), "Historic shrine with a striking vermillion torii tunnel and city views.", {hours:"Grounds free, generally open daily"}),
+      activityCard("d3a1", "", "Toyokawa Inari Betsuin"+pin("Toyokawa Inari Betsuin Tokyo"), "A few minutes' walk from Hie Shrine, known for its fox statues.")
+    ]},
+    {label:"Midday", cards:[
+      activityCard("d3a2", "", "Edo‑Tokyo Museum"+pin("Edo-Tokyo Museum Ryogoku"), "Across town to Ryōgoku — immersive exhibits on old Edo and Tokyo's history. Reopened 31 March 2026 after its long renovation closure — confirmed open for this trip.", {hours:"9:30–17:30 (Sat to 19:30) · closed Mon · ¥800 (~£4)"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d3a3", "", "Sumida Hokusai Museum"+pin("Sumida Hokusai Museum"), "Right by the Edo‑Tokyo Museum, dedicated to the ukiyo‑e master.", {hours:"9:30–17:30, last entry 17:00 · closed Mon · ¥400 (~£2)"})
+    ]},
+    {label:"Late afternoon", cards:[
+      activityCard("d3a4", "", "Tokyo Skytree"+pin("Tokyo Skytree"), "Short hop from Ryōgoku — great views, no need to go up if already done elsewhere.", {hours:"10:00–22:00, last admission 21:00 · Tembo Deck ¥1,800–2,300 (~£9–£11.50) depending on day/time"})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d3a5", "", "Boat to Odaiba"+pin("Odaiba Tokyo"), "Water bus from the pier near Asakusa, scenic ride along the Sumida River.", {hours:"~6 sailings/day (roughly 10:00, 11:00, 13:10, 14:10, 15:30, 16:10) — worth checking the exact times before heading to the pier · ¥2,000 one‑way (~£10)"})
+    ]}
+  ])
 },
 { id:4, date:"4 October", weekday:"Sunday", month:"OCT", num:4, city:"kyo", travel:true,
   title:"Tokyo → Kyoto",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Sunday, 4 October</div>
     <div class="detail-title">Tokyo → Kyoto</div>
     <span class="badge kyo">TRAVEL DAY · TOKYO → KYOTO</span>
-    ${transitBlock("Train", [
+  `, [
+    {fixed: transitBlock("Train", [
       { from:{code:"TOKYO", time:"10:12"}, to:{code:"KYOTO", time:"12:23"}, train:"Nazomi 23", dur:"2h 11m" }
-    ])}
-    ${hotelBlock("Tokyu Stay Sanjo‑Karasuma", "Tokyu Stay Sanjo Karasuma Kyoto", null, "3:00pm", null)}
-    ${planBlock("Rest of the day", [
-      {when:"", what:"Karasuma line to the hotel", p:"Drop bags at hotel and go for a wander before check‑in time, then back on the Karasuma line to Kyoto Station to visit the sights of:"},
-      {when:"", what:"Higashi Hongan‑ji Temple"+pin("Higashi Honganji Temple Kyoto"), p:"", hours:"5:50–17:30 (Mar–Oct) · free"},
-      {when:"", what:"Nishi Hongan‑ji Temple"+pin("Nishi Honganji Temple Kyoto"), p:"", hours:"5:30–17:00 · free"},
-      {when:"", what:"Tō‑ji Temple"+pin("Toji Temple Kyoto"), p:"", alt:"Shōsei‑en Garden"+pin("Shoseien Garden Kyoto"), hours:"Kondō/Kōdō 8:00–17:00, last entry 16:30 · ¥800 (~£3.85)", cash:"not confirmed to take card — worth carrying cash"},
-      {when:"", what:"Check‑in", p:"Rest."},
-      {when:"Evening", what:"Dinner nearby hotel", p:"Afterwards maybe a late night walk around Sannenzaka"+pin("Sannenzaka Kyoto")+" and Ninenzaka"+pin("Ninenzaka Kyoto")+"."}
-    ])}
-    ${calmBlock("First proper day in a second city, and the trickiest logistics of the whole trip — the long-haul flight, the first train — are already done. Everything from here is smaller steps.")}
-  `
+    ])},
+    {fixed: hotelBlock("Tokyu Stay Sanjo‑Karasuma", "Tokyu Stay Sanjo Karasuma Kyoto", null, "3:00pm", null)},
+    {label:"Rest of the day", cards:[
+      activityCard("d4a0", "", "Karasuma line to the hotel", "Drop bags at hotel and go for a wander before check‑in time, then back on the Karasuma line to Kyoto Station to visit the sights of:"),
+      activityCard("d4a1", "", "Higashi Hongan‑ji Temple"+pin("Higashi Honganji Temple Kyoto"), "", {hours:"5:50–17:30 (Mar–Oct) · free"}),
+      activityCard("d4a2", "", "Nishi Hongan‑ji Temple"+pin("Nishi Honganji Temple Kyoto"), "", {hours:"5:30–17:00 · free"}),
+      activityCard("d4a3", "", "Tō‑ji Temple"+pin("Toji Temple Kyoto"), "", {alt:"Shōsei‑en Garden"+pin("Shoseien Garden Kyoto"), hours:"Kondō/Kōdō 8:00–17:00, last entry 16:30 · ¥800 (~£3.85)", cash:"not confirmed to take card — worth carrying cash"}),
+      activityCard("d4a4", "", "Check‑in", "Rest."),
+      activityCard("d4a5", "Evening", "Dinner nearby hotel", "Afterwards maybe a late night walk around Sannenzaka"+pin("Sannenzaka Kyoto")+" and Ninenzaka"+pin("Ninenzaka Kyoto")+".")
+    ]}
+  ])
 },
 { id:5, date:"5 October", weekday:"Monday", month:"OCT", num:5, city:"kyo", travel:false,
   title:"Kyoto",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Monday, 5 October</div>
     <div class="detail-title">In Kyoto</div>
     <span class="badge kyo">KYOTO</span>
-    ${planBlock("Morning — Philosopher's Path", [
-      {when:"", what:"Peaceful canal‑side walk (2 kilometres)"+pin("Philosophers Path Kyoto"), p:"Passing small and big temples."},
-      {when:"", what:"Ginkaku‑ji (Silver Pavilion)"+pin("Ginkakuji Silver Pavilion Kyoto"), p:"The path's northern starting point, famous for its moss garden and sand cone.", hours:"8:30–17:00 in October · ¥500 (~£2.40)"},
-      {when:"", what:"Hōnen‑in"+pin("Honen-in Temple Kyoto"), p:"Small, quiet temple just off the path, known for its thatched gate and mossy grounds.", hours:"Grounds 6:00–16:00 · free (main hall only opens for special spring/autumn viewings — not in early October)"},
-      {when:"", what:"Otoyo Shrine"+pin("Otoyo Shrine Kyoto"), p:"A small Shinto shrine with unusual mouse, monkey, and owl statues guarding it."},
-      {when:"", what:"Anraku‑ji"+pin("Anrakuji Temple Kyoto"), p:"Modest temple with a peaceful garden, sometimes closed to the public except in spring/autumn."},
-      {when:"", what:"Reikan‑ji"+pin("Reikanji Temple Kyoto"), p:"Small nunnery temple, occasionally open seasonally."},
-      {when:"", what:"Nyakuōji Shrine"+pin("Nyakuoji Shrine Kyoto"), p:"Another minor shrine along the route."},
-      {when:"", what:"Eikan‑dō (Zenrin‑ji)"+pin("Eikando Zenrinji Kyoto"), p:"Just off the southern end, especially popular for its autumn maple colors. Its famous autumn light-up starts in November — after this visit, so daytime only.", hours:"9:00–17:00, last entry 16:00 · ¥1,000 (~£4.80)"},
-      {when:"", what:"Nanzen‑ji"+pin("Nanzenji Temple Kyoto"), p:"The path's southern endpoint, a major Zen temple complex with an impressive aqueduct and gardens.", hours:"Grounds free and open · Sanmon Gate & Hōjō 8:40–17:00 · subtemples ¥400–600 (~£1.90–£2.90) each"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"Lunch", what:"Somewhere nearby", p:""},
-      {when:"", what:"Kyoto City KYOCERA Museum of Art"+pin("Kyoto City KYOCERA Museum of Art"), p:"", hours:"10:00–18:00, last entry 17:30 · closed Mon · ¥730 (~£3.50)"},
-      {when:"", what:"Heian‑jingū Shrine and Gardens"+pin("Heian Jingu Shrine Kyoto"), p:"", hours:"Shrine 6:00–17:30 in October, free · Shin'en Garden 8:30–17:30, ¥600 (~£2.90)"},
-      {when:"", what:"Kiyomizu‑dera"+pin("Kiyomizu-dera Kyoto"), p:"", hours:"Opens 6:00, closes ~18:00 (autumn light-up is late Nov, after this trip) · ¥500 (~£2.40)", cash:"explicitly cash-recommended — don't rely on a card at the ticket window"},
-      {when:"", what:"Hōkan‑ji Temple (Yasaka Pagoda)"+pin("Hokanji Yasaka Pagoda Kyoto"), p:"Climbing the pagoda is weekend-only (Sat–Sun, 10:00–15:00) — this visit falls on a Monday, so worth treating as an exterior/photo stop unless plans shift to a weekend.", hours:"¥400–500 (~£1.90–£2.40) to climb, weekends only", cash:"small, manually staffed — cash advisable"},
-      {when:"", what:"Yasaka Shrine"+pin("Yasaka Shrine Kyoto"), p:"Back at hotel for rest and refresh.", hours:"Grounds open 24/7 · free"}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Pontochō alley"+pin("Pontocho Alley Kyoto")+" for dinner", p:"Stroll along the river, go for a late night Gion walk around Hanamikoji Street (Geisha street)."+pin("Hanamikoji Street Gion Kyoto")}
-    ])}
-  `
+  `, [
+    {label:"Morning — Philosopher's Path", cards:[
+      activityCard("d5a0", "", "Peaceful canal‑side walk (2 kilometres)"+pin("Philosophers Path Kyoto"), "Passing small and big temples."),
+      activityCard("d5a1", "", "Ginkaku‑ji (Silver Pavilion)"+pin("Ginkakuji Silver Pavilion Kyoto"), "The path's northern starting point, famous for its moss garden and sand cone.", {hours:"8:30–17:00 in October · ¥500 (~£2.40)"}),
+      activityCard("d5a2", "", "Hōnen‑in"+pin("Honen-in Temple Kyoto"), "Small, quiet temple just off the path, known for its thatched gate and mossy grounds.", {hours:"Grounds 6:00–16:00 · free (main hall only opens for special spring/autumn viewings — not in early October)"}),
+      activityCard("d5a3", "", "Otoyo Shrine"+pin("Otoyo Shrine Kyoto"), "A small Shinto shrine with unusual mouse, monkey, and owl statues guarding it."),
+      activityCard("d5a4", "", "Anraku‑ji"+pin("Anrakuji Temple Kyoto"), "Modest temple with a peaceful garden, sometimes closed to the public except in spring/autumn."),
+      activityCard("d5a5", "", "Reikan‑ji"+pin("Reikanji Temple Kyoto"), "Small nunnery temple, occasionally open seasonally."),
+      activityCard("d5a6", "", "Nyakuōji Shrine"+pin("Nyakuoji Shrine Kyoto"), "Another minor shrine along the route."),
+      activityCard("d5a7", "", "Eikan‑dō (Zenrin‑ji)"+pin("Eikando Zenrinji Kyoto"), "Just off the southern end, especially popular for its autumn maple colors. Its famous autumn light-up starts in November — after this visit, so daytime only.", {hours:"9:00–17:00, last entry 16:00 · ¥1,000 (~£4.80)"}),
+      activityCard("d5a8", "", "Nanzen‑ji"+pin("Nanzenji Temple Kyoto"), "The path's southern endpoint, a major Zen temple complex with an impressive aqueduct and gardens.", {hours:"Grounds free and open · Sanmon Gate & Hōjō 8:40–17:00 · subtemples ¥400–600 (~£1.90–£2.90) each"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d5a9", "Lunch", "Somewhere nearby", ""),
+      activityCard("d5a10", "", "Kyoto City KYOCERA Museum of Art"+pin("Kyoto City KYOCERA Museum of Art"), "", {hours:"10:00–18:00, last entry 17:30 · closed Mon · ¥730 (~£3.50)"}),
+      activityCard("d5a11", "", "Heian‑jingū Shrine and Gardens"+pin("Heian Jingu Shrine Kyoto"), "", {hours:"Shrine 6:00–17:30 in October, free · Shin'en Garden 8:30–17:30, ¥600 (~£2.90)"}),
+      activityCard("d5a12", "", "Kiyomizu‑dera"+pin("Kiyomizu-dera Kyoto"), "", {hours:"Opens 6:00, closes ~18:00 (autumn light-up is late Nov, after this trip) · ¥500 (~£2.40)", cash:"explicitly cash-recommended — don't rely on a card at the ticket window"}),
+      activityCard("d5a13", "", "Hōkan‑ji Temple (Yasaka Pagoda)"+pin("Hokanji Yasaka Pagoda Kyoto"), "Climbing the pagoda is weekend-only (Sat–Sun, 10:00–15:00) — this visit falls on a Monday, so worth treating as an exterior/photo stop unless plans shift to a weekend.", {hours:"¥400–500 (~£1.90–£2.40) to climb, weekends only", cash:"small, manually staffed — cash advisable"}),
+      activityCard("d5a14", "", "Yasaka Shrine"+pin("Yasaka Shrine Kyoto"), "Back at hotel for rest and refresh.", {hours:"Grounds open 24/7 · free"})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d5a15", "", "Pontochō alley"+pin("Pontocho Alley Kyoto")+" for dinner", "Stroll along the river, go for a late night Gion walk around Hanamikoji Street (Geisha street)."+pin("Hanamikoji Street Gion Kyoto"))
+    ]}
+  ])
 },
 { id:6, date:"6 October", weekday:"Tuesday", month:"OCT", num:6, city:"kyo", travel:false,
   title:"Kyoto",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Tuesday, 6 October</div>
     <div class="detail-title">In Kyoto</div>
     <span class="badge kyo">KYOTO</span>
-    ${planBlock("Morning — Arashiyama", [
-      {when:"", what:"Arashiyama"+pin("Arashiyama Bamboo Grove Kyoto"), p:"Famous for towering bamboo groves, historic Zen temples, and the iconic Togetsukyō Bridge. For over a thousand years, it has served as a celebrated natural retreat for Japanese aristocrats, blending dramatic river and mountain landscapes with rich cultural heritage."},
-      {when:"", what:"Togetsukyō Bridge"+pin("Togetsukyo Bridge Arashiyama"), p:"Public bridge, free, always open."},
-      {when:"", what:"Arashiyama Bamboo Forest"+pin("Arashiyama Bamboo Forest Kyoto"), p:"Free, always accessible outdoor path."},
-      {when:"", what:"Jōjakkō‑ji Temple"+pin("Jojakkoji Temple Kyoto"), p:"", hours:"9:00–17:00, last entry 16:30 · ¥500 (~£2.40)"},
-      {when:"", what:"Giō‑ji Temple"+pin("Giooji Temple Kyoto"), p:"", hours:"9:00–16:50, last entry 16:30 · ¥500 (~£2.40)"},
-      {when:"", what:"Adashino Nenbutsu‑ji Temple"+pin("Adashino Nenbutsuji Temple Kyoto"), p:"", hours:"9:00–17:00 · ¥500 (~£2.40)"},
-      {when:"", what:"Otagi Nenbutsuji"+pin("Otagi Nenbutsuji Kyoto"), p:"", hours:"9:00–16:00/16:15 last entry · closed Wed AND Sat, per the temple's own site — worth checking before visiting · ¥1,000 (~£4.80)", alt:"Daikaku‑ji Temple"+pin("Daikakuji Temple Kyoto")+" (¥800/£3.85 temple, ¥500/£2.40 pond & garden)"}
-    ])}
-    ${planBlock("Midday", [
-      {when:"Lunch", what:"Around Arashiyama by the river", p:"Take a boat trip along the river.", alt:"Arashiyama Yusai‑Tei Gallery"+pin("Arashiyama Yusai-Tei Kyoto")+" — or Arashiyama Monkey Park Iwatayama"+pin("Arashiyama Monkey Park Iwatayama")}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Head back to hotel", p:"Rest, maybe nap — maybe look for an onsen to bathe."}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"teamLab Kyoto"+pin("teamLab Kyoto"), p:"Last entry at 19:00. Uses dynamic, date‑based pricing — advance online booking is standard practice; buying at the door on the day costs more and risks selling out in peak autumn season.", hours:"9:00–21:00, last entry 19:30 (check the exact date's hours) · ~¥3,800 (~£18) baseline"}
-    ])}
-    ${calmBlock("This much choice on any one day can feel like a lot to plan around — but nothing here is a hard deadline except teamLab's entry window. Anything skipped today isn't lost, just left for another visit.")}
-  `
+  `, [
+    {label:"Morning — Arashiyama", cards:[
+      activityCard("d6a0", "", "Arashiyama"+pin("Arashiyama Bamboo Grove Kyoto"), "Famous for towering bamboo groves, historic Zen temples, and the iconic Togetsukyō Bridge. For over a thousand years, it has served as a celebrated natural retreat for Japanese aristocrats, blending dramatic river and mountain landscapes with rich cultural heritage."),
+      activityCard("d6a1", "", "Togetsukyō Bridge"+pin("Togetsukyo Bridge Arashiyama"), "Public bridge, free, always open."),
+      activityCard("d6a2", "", "Arashiyama Bamboo Forest"+pin("Arashiyama Bamboo Forest Kyoto"), "Free, always accessible outdoor path."),
+      activityCard("d6a3", "", "Jōjakkō‑ji Temple"+pin("Jojakkoji Temple Kyoto"), "", {hours:"9:00–17:00, last entry 16:30 · ¥500 (~£2.40)"}),
+      activityCard("d6a4", "", "Giō‑ji Temple"+pin("Giooji Temple Kyoto"), "", {hours:"9:00–16:50, last entry 16:30 · ¥500 (~£2.40)"}),
+      activityCard("d6a5", "", "Adashino Nenbutsu‑ji Temple"+pin("Adashino Nenbutsuji Temple Kyoto"), "", {hours:"9:00–17:00 · ¥500 (~£2.40)"}),
+      activityCard("d6a6", "", "Otagi Nenbutsuji"+pin("Otagi Nenbutsuji Kyoto"), "", {hours:"9:00–16:00/16:15 last entry · closed Wed AND Sat, per the temple's own site — worth checking before visiting · ¥1,000 (~£4.80)", alt:"Daikaku‑ji Temple"+pin("Daikakuji Temple Kyoto")+" (¥800/£3.85 temple, ¥500/£2.40 pond & garden)"})
+    ]},
+    {label:"Midday", cards:[
+      activityCard("d6a7", "Lunch", "Around Arashiyama by the river", "Take a boat trip along the river.", {alt:"Arashiyama Yusai‑Tei Gallery"+pin("Arashiyama Yusai-Tei Kyoto")+" — or Arashiyama Monkey Park Iwatayama"+pin("Arashiyama Monkey Park Iwatayama")})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d6a8", "", "Head back to hotel", "Rest, maybe nap — maybe look for an onsen to bathe.")
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d6a9", "", "teamLab Kyoto"+pin("teamLab Kyoto"), "Last entry at 19:00. Uses dynamic, date‑based pricing — advance online booking is standard practice; buying at the door on the day costs more and risks selling out in peak autumn season.", {hours:"9:00–21:00, last entry 19:30 (check the exact date's hours) · ~¥3,800 (~£18) baseline"})
+    ]}
+  ])
 },
 { id:7, date:"7 October", weekday:"Wednesday", month:"OCT", num:7, city:"kyo", travel:false, trip:true,
   title:"Kyoto (day trip: Nara)",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Wednesday, 7 October</div>
     <div class="detail-title">Day trip to Nara</div>
     <span class="badge kyo">MORNING/AFTERNOON · DAY TRIP TO NARA</span>
-    ${tipBlock("Getting there", [
+  `, [
+    {fixed: tipBlock("Getting there", [
       "Japan's first permanent capital. It features over a thousand free‑roaming sacred deer, the massive Tōdai‑ji Temple housing a giant bronze Buddha, and ancient shrines filled with thousands of stone and bronze lanterns.",
       "A return train ride from Kyoto to Nara costs between ¥720 and ¥1,280 (£8 to £16) depending on the line and train type. The trip takes about 35 to 45 minutes on direct express options. Arriving in Nara we can take a 15min bus ride to the main area of Nara Park"+pin("Nara Park")+" where we can find:",
       "Deer crackers (shika senbei) are sold from street stalls and vending machines around the park for about ¥200 (~£1) a pack — a classic small cash purchase, so a few ¥100 coins are handy."
-    ])}
-    ${planBlock("In Nara", [
-      {when:"", what:"Nandaimon Gate"+pin("Nandaimon Gate Todaiji Nara"), p:""},
-      {when:"", what:"Tōdaiji Kagami‑ike Pond"+pin("Kagami-ike Pond Todaiji Nara"), p:""},
-      {when:"", what:"Tōdai‑ji"+pin("Todaiji Temple Nara"), p:"", hours:"April–October: 7:30–17:30 · ¥800 (~£3.85)"},
-      {when:"", what:"Nigatsu‑do"+pin("Nigatsu-do Todaiji Nara"), p:""},
-      {when:"", what:"Higashimuki Shopping Street"+pin("Higashimuki Shopping Street Nara"), p:""},
-      {when:"", what:"Nakatanidou sweets shopping street"+pin("Nakatanidou Nara"), p:""},
-      {when:"", what:"Naramachi Historic District"+pin("Naramachi Nara"), p:"", alt:"Kasugataisha Shrine"+pin("Kasuga Taisha Shrine Nara")+" (grounds free; inner sanctuary ¥700/£3.35) — Shiga Naoya's Old Residence"+pin("Shiga Naoya Old Residence Nara")}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Back in Kyoto", p:"Enjoy a relaxing evening around the river and hotel area, maybe enjoy an onsen."}
-    ])}
-    ${calmBlock("A day trip always feels like it has more moving parts than it really does — train there, wander, train back. There's slack built into these times, so one missed connection won't unravel the day.")}
-  `
+    ])},
+    {label:"In Nara", cards:[
+      activityCard("d7a0", "", "Nandaimon Gate"+pin("Nandaimon Gate Todaiji Nara"), ""),
+      activityCard("d7a1", "", "Tōdaiji Kagami‑ike Pond"+pin("Kagami-ike Pond Todaiji Nara"), ""),
+      activityCard("d7a2", "", "Tōdai‑ji"+pin("Todaiji Temple Nara"), "", {hours:"April–October: 7:30–17:30 · ¥800 (~£3.85)"}),
+      activityCard("d7a3", "", "Nigatsu‑do"+pin("Nigatsu-do Todaiji Nara"), ""),
+      activityCard("d7a4", "", "Higashimuki Shopping Street"+pin("Higashimuki Shopping Street Nara"), ""),
+      activityCard("d7a5", "", "Nakatanidou sweets shopping street"+pin("Nakatanidou Nara"), ""),
+      activityCard("d7a6", "", "Naramachi Historic District"+pin("Naramachi Nara"), "", {alt:"Kasugataisha Shrine"+pin("Kasuga Taisha Shrine Nara")+" (grounds free; inner sanctuary ¥700/£3.35) — Shiga Naoya's Old Residence"+pin("Shiga Naoya Old Residence Nara")})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d7a7", "", "Back in Kyoto", "Enjoy a relaxing evening around the river and hotel area, maybe enjoy an onsen.")
+    ]}
+  ])
 },
 { id:8, date:"8 October", weekday:"Thursday", month:"OCT", num:8, city:"kyo", travel:false,
   title:"Kyoto",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Thursday, 8 October</div>
     <div class="detail-title">In Kyoto</div>
     <span class="badge kyo">KYOTO</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Fushimi Inari"+pin("Fushimi Inari Shrine Kyoto"), p:"Ideally early rise to see the sunrise from Inari gates, a slow morning walk, enjoying the ambience more quiet and serene, hearing the nature surrounding and with lesser crowds. Once down find a local place to eat breakfast and carry on exploring the temples on south east of the city, such as:", hours:"Always open, 24/7 · free"},
-      {when:"", what:"Tōfuku‑ji Temple"+pin("Tofukuji Temple Kyoto"), p:"", hours:"Grounds free · October hours 9:00–16:00, gates close 16:30 · Hōjō garden ¥500 (~£2.40)"},
-      {when:"", what:"Tsuten‑kyo Bridge"+pin("Tsutenkyo Bridge Tofukuji Kyoto"), p:"Part of Tōfuku‑ji's paid garden viewing.", hours:"¥600 (~£2.90) in October — rises only during the mid/late‑November autumn‑peak season"},
-      {when:"", what:"Reigen‑in Temple"+pin("Reigen-in Temple Kyoto"), p:""},
-      {when:"", what:"Sanjūsangendō Temple / 1001 Statues"+pin("Sanjusangendo Kyoto"), p:"", hours:"8:30–17:00 (Apr 1–Nov 15 hours) · ¥600 (~£2.90)"},
-      {when:"", what:"Nijō Castle"+pin("Nijo Castle Kyoto"), p:"Do a big loop over here after Sanjūsangen‑dō.", hours:"Grounds 8:45–16:00, gates close 17:00 · Ninomaru Palace 8:45–16:10 · grounds ¥800 (~£3.85), +¥500 (~£2.40) for the Palace, or ¥1,300 (~£6.25) combined"},
-      {when:"", what:"Number 12 bus to Kinkaku‑ji"+pin("Kinkaku-ji Kyoto"), p:"", hours:"9:00–17:00 daily · ¥500 (~£2.40)"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Return to the hotel", p:"Rest due to the early start. Enjoy the rest of the day locally, looking for last minute souvenirs, and saying bye to the city."}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Nice dinner somewhere", p:""}
-    ])}
-  `
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d8a0", "", "Fushimi Inari"+pin("Fushimi Inari Shrine Kyoto"), "Ideally early rise to see the sunrise from Inari gates, a slow morning walk, enjoying the ambience more quiet and serene, hearing the nature surrounding and with lesser crowds. Once down find a local place to eat breakfast and carry on exploring the temples on south east of the city, such as:", {hours:"Always open, 24/7 · free"}),
+      activityCard("d8a1", "", "Tōfuku‑ji Temple"+pin("Tofukuji Temple Kyoto"), "", {hours:"Grounds free · October hours 9:00–16:00, gates close 16:30 · Hōjō garden ¥500 (~£2.40)"}),
+      activityCard("d8a2", "", "Tsuten‑kyo Bridge"+pin("Tsutenkyo Bridge Tofukuji Kyoto"), "Part of Tōfuku‑ji's paid garden viewing.", {hours:"¥600 (~£2.90) in October — rises only during the mid/late‑November autumn‑peak season"}),
+      activityCard("d8a3", "", "Reigen‑in Temple"+pin("Reigen-in Temple Kyoto"), ""),
+      activityCard("d8a4", "", "Sanjūsangendō Temple / 1001 Statues"+pin("Sanjusangendo Kyoto"), "", {hours:"8:30–17:00 (Apr 1–Nov 15 hours) · ¥600 (~£2.90)"}),
+      activityCard("d8a5", "", "Nijō Castle"+pin("Nijo Castle Kyoto"), "Do a big loop over here after Sanjūsangen‑dō.", {hours:"Grounds 8:45–16:00, gates close 17:00 · Ninomaru Palace 8:45–16:10 · grounds ¥800 (~£3.85), +¥500 (~£2.40) for the Palace, or ¥1,300 (~£6.25) combined"}),
+      activityCard("d8a6", "", "Number 12 bus to Kinkaku‑ji"+pin("Kinkaku-ji Kyoto"), "", {hours:"9:00–17:00 daily · ¥500 (~£2.40)"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d8a7", "", "Return to the hotel", "Rest due to the early start. Enjoy the rest of the day locally, looking for last minute souvenirs, and saying bye to the city.")
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d8a8", "", "Nice dinner somewhere", "")
+    ]}
+  ])
 },
 { id:9, date:"9 October", weekday:"Friday", month:"OCT", num:9, city:"tak", travel:true,
   title:"Kyoto → Takayama",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Friday, 9 October</div>
     <div class="detail-title">Kyoto → Takayama</div>
     <span class="badge tak">TRAVEL DAY · KYOTO → TAKAYAMA</span>
-    ${transitBlock("Train (one change)", [
+  `, [
+    {fixed: transitBlock("Train (one change)", [
       { from:{code:"KYOTO", time:"09:33"}, to:{code:"NAGOYA", time:"10:25"}, train:"Hikari 644", dur:"52m" },
       { from:{code:"NAGOYA", time:"10:48"}, to:{code:"TAKAYAMA", time:"13:15"}, train:"Hida 7", dur:"2h 27m", changeAt:"Nagoya", changeGap:"23 min to change" }
-    ])}
-    ${tipBlock("Worth double‑checking", [
+    ])},
+    {fixed: tipBlock("Worth double‑checking", [
       "The Kyoto‑side doc gives the Takayama arrival as 13:12pm; the Takayama‑side doc gives 13:15. Both say the same route (Hikari 644 to Nagoya, change to Hida 7) — just flagging the small mismatch between the two source documents rather than picking one."
-    ])}
-    ${hotelBlock("Airbnb", "Takayama accommodation", null, "4:00pm", null, "Store luggage at station or in a convenient place until check‑in.")}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Wander in town", p:"Until check‑in time allows us inside the accommodation."},
-      {when:"", what:"Old Town / Sanmachi Suji"+pin("Sanmachi Suji Takayama"), p:"Wander merchant streets, sake breweries, snacks.", cash:"sake breweries' tasting samples (~¥100–500 / £0.50–£2.50) are commonly cash-only"},
-      {when:"~15:00", what:"Afternoon yatai parade + mikoshi procession", p:""},
-      {when:"", what:"Sakurayama Hachimangu Shrine"+pin("Sakurayama Hachimangu Shrine Takayama"), p:"Circa‑5th‑century shrine in a serene, wooded locale, known for its festivals & colorful floats. Open 24/7 — also interesting to visit later in the evening.", hours:"Grounds free, always open"}
-    ])}
-    ${planBlock("Check‑in — 16:00", [
-      {when:"", what:"Rest + relax", p:"If interested in watching the Yatai parade, arrive around 18:00 at Omotesandō Street"+pin("Omotesando Street Takayama")+" where the festival gathers and starts its procession. Parade happens from 18:30 until 21:00.", hours:"Free to watch from the street — no fee confirmed for viewing"},
-      {when:"", what:"The Floats", p:"Handcrafted, multi‑tier festival carts decorated with intricate wood carvings and metalwork."},
-      {when:"", what:"The Lanterns", p:"Around 100, flickering paper lanterns attached to each float."},
-      {when:"", what:"The Atmosphere", p:"Traditional flute and drum music echoes through old‑town alleys as the glowing carts move in the night.", cash:"festival food stalls are commonly cash-only or cash-preferred — worth carrying plenty of small notes and coins"}
-    ])}
-    ${calmBlock("Festival crowds always look more overwhelming from a distance than they feel once you're in among them — mostly families and locals in good spirits. And there's no obligation to stay for the whole parade if it gets to be too much.")}
-  `
+    ])},
+    {fixed: hotelBlock("Airbnb", "Takayama accommodation", null, "4:00pm", null, "Store luggage at station or in a convenient place until check‑in.")},
+    {label:"Afternoon", cards:[
+      activityCard("d9a0", "", "Wander in town", "Until check‑in time allows us inside the accommodation."),
+      activityCard("d9a1", "", "Old Town / Sanmachi Suji"+pin("Sanmachi Suji Takayama"), "Wander merchant streets, sake breweries, snacks.", {cash:"sake breweries' tasting samples (~¥100–500 / £0.50–£2.50) are commonly cash-only"}),
+      activityCard("d9a2", "~15:00", "Afternoon yatai parade + mikoshi procession", ""),
+      activityCard("d9a3", "", "Sakurayama Hachimangu Shrine"+pin("Sakurayama Hachimangu Shrine Takayama"), "Circa‑5th‑century shrine in a serene, wooded locale, known for its festivals & colorful floats. Open 24/7 — also interesting to visit later in the evening.", {hours:"Grounds free, always open"})
+    ]},
+    {label:"Check‑in — 16:00", cards:[
+      activityCard("d9a4", "", "Rest + relax", "If interested in watching the Yatai parade, arrive around 18:00 at Omotesandō Street"+pin("Omotesando Street Takayama")+" where the festival gathers and starts its procession. Parade happens from 18:30 until 21:00.", {hours:"Free to watch from the street — no fee confirmed for viewing"}),
+      activityCard("d9a5", "", "The Floats", "Handcrafted, multi‑tier festival carts decorated with intricate wood carvings and metalwork."),
+      activityCard("d9a6", "", "The Lanterns", "Around 100, flickering paper lanterns attached to each float."),
+      activityCard("d9a7", "", "The Atmosphere", "Traditional flute and drum music echoes through old‑town alleys as the glowing carts move in the night.", {cash:"festival food stalls are commonly cash-only or cash-preferred — worth carrying plenty of small notes and coins"})
+    ]}
+  ])
 },
 { id:10, date:"10 October", weekday:"Saturday", month:"OCT", num:10, city:"tak", travel:false,
   title:"Takayama",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Saturday, 10 October</div>
     <div class="detail-title">In Takayama</div>
     <span class="badge tak">TAKAYAMA</span>
-    ${planBlock("Morning/Afternoon", [
-      {when:"", what:"Sakurayama Hachimangu Shrine"+pin("Sakurayama Hachimangu Shrine Takayama"), p:"Karakuri marionette performances — Oct 10 showings around 11:00 & 13:00, roughly 50 min each, included rather than separately ticketed."},
-      {when:"", what:"Yatai Kaikan (Float Exhibition Hall)"+pin("Yatai Kaikan Takayama"), p:"Allowing visitors to view four of the town's magnificent, centuries‑old wooden festival floats.", hours:"9:00–17:00 (Mar–Nov) · ¥900 (~£4.30)", cash:"card acceptance unclear — carry cash as backup"},
-      {when:"", what:"Takayama Jinya"+pin("Takayama Jinya"), p:"Only preserved Edo‑period government house in Japan.", hours:"8:45–17:00 (Apr–Oct schedule) · ¥440 (~£2.10)", cash:"small municipal site — cash preferable"},
-      {when:"", what:"Mikoshi return parade", p:"A Japanese Shinto festival event where a portable shrine (mikoshi), which carries a deity temporarily housed around the city or at an interim resting place (otabisho), is triumphantly carried back to its main shrine. Expect crowds and high energy chants.", hours:"Free to watch"}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Reserve a restaurant", p:"Preferred due to festival — high density in town of tourists. Specialty: Hida wagyu."}
-    ])}
-  `
+  `, [
+    {label:"Morning/Afternoon", cards:[
+      activityCard("d10a0", "", "Sakurayama Hachimangu Shrine"+pin("Sakurayama Hachimangu Shrine Takayama"), "Karakuri marionette performances — Oct 10 showings around 11:00 & 13:00, roughly 50 min each, included rather than separately ticketed."),
+      activityCard("d10a1", "", "Yatai Kaikan (Float Exhibition Hall)"+pin("Yatai Kaikan Takayama"), "Allowing visitors to view four of the town's magnificent, centuries‑old wooden festival floats.", {hours:"9:00–17:00 (Mar–Nov) · ¥900 (~£4.30)", cash:"card acceptance unclear — carry cash as backup"}),
+      activityCard("d10a2", "", "Takayama Jinya"+pin("Takayama Jinya"), "Only preserved Edo‑period government house in Japan.", {hours:"8:45–17:00 (Apr–Oct schedule) · ¥440 (~£2.10)", cash:"small municipal site — cash preferable"}),
+      activityCard("d10a3", "", "Mikoshi return parade", "A Japanese Shinto festival event where a portable shrine (mikoshi), which carries a deity temporarily housed around the city or at an interim resting place (otabisho), is triumphantly carried back to its main shrine. Expect crowds and high energy chants.", {hours:"Free to watch"})
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d10a4", "", "Reserve a restaurant", "Preferred due to festival — high density in town of tourists. Specialty: Hida wagyu.")
+    ]}
+  ])
 },
 { id:11, date:"11 October", weekday:"Sunday", month:"OCT", num:11, city:"kan", travel:true,
   title:"Takayama → Kanazawa",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Sunday, 11 October</div>
     <div class="detail-title">Takayama → Kanazawa</div>
     <span class="badge kan">TRAVEL DAY · TAKAYAMA → KANAZAWA</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Takayama Morning Market"+pin("Takayama Morning Market"), p:"Miyagawa or Jinya‑mae market along the river."},
-      {when:"", what:"Old Town craft & sake shops"+pin("Sanmachi Suji Takayama"), p:"Browse shops now open (closed during festival)."},
-      {when:"Check‑out by 11:00", what:"Drop suitcases on a storage locker", p:"Stroll around the city checking souvenirs and a quiet ambience post festival."},
-      {when:"", what:"Kusakabe Heritage House"+pin("Kusakabe Heritage House Takayama"), p:"Local history museum in a converted merchant house."},
-      {when:"", what:"Enako River / Nakabashi Bridge stroll"+pin("Nakabashi Bridge Takayama"), p:"Riverside walk lined with willows and cafes."},
-      {when:"", what:"Higashiyama Walking Course"+pin("Higashiyama Walking Course Takayama"), p:"A 3.5‑kilometer (2.2 mile) self‑guided trail in Takayama. It takes about 1.5 to 2 hours to complete. The path leads through a quiet historic temple district, peaceful backstreets, and the forested hills of Shiroyama Park."}
-    ])}
-    ${transitBlock("Train (one change)", [
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d11a0", "", "Takayama Morning Market"+pin("Takayama Morning Market"), "Miyagawa or Jinya‑mae market along the river."),
+      activityCard("d11a1", "", "Old Town craft & sake shops"+pin("Sanmachi Suji Takayama"), "Browse shops now open (closed during festival)."),
+      activityCard("d11a2", "Check‑out by 11:00", "Drop suitcases on a storage locker", "Stroll around the city checking souvenirs and a quiet ambience post festival."),
+      activityCard("d11a3", "", "Kusakabe Heritage House"+pin("Kusakabe Heritage House Takayama"), "Local history museum in a converted merchant house."),
+      activityCard("d11a4", "", "Enako River / Nakabashi Bridge stroll"+pin("Nakabashi Bridge Takayama"), "Riverside walk lined with willows and cafes."),
+      activityCard("d11a5", "", "Higashiyama Walking Course"+pin("Higashiyama Walking Course Takayama"), "A 3.5‑kilometer (2.2 mile) self‑guided trail in Takayama. It takes about 1.5 to 2 hours to complete. The path leads through a quiet historic temple district, peaceful backstreets, and the forested hills of Shiroyama Park.")
+    ]},
+    {fixed: transitBlock("Train (one change)", [
       { from:{code:"TAKAYAMA", time:"15:17"}, to:{code:"TOYAMA", time:"16:44"}, train:"Hida 11", dur:"1h 27m" },
       { from:{code:"TOYAMA", time:"17:31"}, to:{code:"KANAZAWA", time:"17:53"}, train:"Tsuguri 39", dur:"22m", changeAt:"Toyama", changeGap:"47 min to change" }
-    ])}
-    ${hotelBlock("Hotel Torifito Kanazawa", "Hotel Torifito Kanazawa", null, null, null)}
-    ${planBlock("Evening", [
-      {when:"", what:"Higashi Chaya District"+pin("Higashi Chaya District Kanazawa"), p:"(8min bus/25 min walk) — easy stroll through the lantern‑lit teahouse streets. Walking down atmospheric Edo‑period streets lined with striking wooden lattice buildings (kimusuko) — dinner nearby. During the day the houses offer tours of preserved teahouses turned museums, experience Kanazawa's renowned gold leaf crafts shops and enjoy local treats.", hours:"Streets free, open 24/7 · individual teahouse experiences extra (e.g. Shima ¥500/£2.55, Kaikaro ¥750/£3.85 — Kaikaro closed Wednesdays)"}
-    ])}
-    ${calmBlock("Three cities in, and the hardest logistics — the train changes, the unfamiliar stations — are already proven to work. This one's a shorter travel day than most of the others.")}
-  `
+    ])},
+    {fixed: hotelBlock("Hotel Torifito Kanazawa", "Hotel Torifito Kanazawa", null, null, null)},
+    {label:"Evening", cards:[
+      activityCard("d11a6", "", "Higashi Chaya District"+pin("Higashi Chaya District Kanazawa"), "(8min bus/25 min walk) — easy stroll through the lantern‑lit teahouse streets. Walking down atmospheric Edo‑period streets lined with striking wooden lattice buildings (kimusuko) — dinner nearby. During the day the houses offer tours of preserved teahouses turned museums, experience Kanazawa's renowned gold leaf crafts shops and enjoy local treats.", {hours:"Streets free, open 24/7 · individual teahouse experiences extra (e.g. Shima ¥500/£2.55, Kaikaro ¥750/£3.85 — Kaikaro closed Wednesdays)"})
+    ]}
+  ])
 },
 { id:12, date:"12 October", weekday:"Monday", month:"OCT", num:12, city:"kan", travel:false,
   title:"Kanazawa",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Monday, 12 October</div>
     <div class="detail-title">In Kanazawa</div>
     <span class="badge kan">KANAZAWA</span>
-    ${planBlock("Morning", [
-      {when:"", what:"Kenroku‑en Garden"+pin("Kenrokuen Garden Kanazawa"), p:"One of Japan's top three gardens, best visited right at opening.", hours:"Mar 1–Oct 15: 7:00–18:00; Oct 16–Feb: 8:00–17:00 — this visit lands right around the seasonal change, worth a quick check on the day · ¥320 (~£1.65)"},
-      {when:"", what:"Kanazawa Castle Park"+pin("Kanazawa Castle Park"), p:"Reconstructed castle grounds next to Kenroku‑en.", hours:"Grounds & main gates free; paid buildings 9:00–16:30, last entry 16:00 · ¥320 (~£1.65), or ¥500 combined with Kenroku‑en"}
-    ])}
-    ${planBlock("Lunch", [
-      {when:"", what:"Ōmichō Market"+pin("Omicho Market Kanazawa"), p:"Kanazawa's kitchen — fresh seafood lunch and stalls.", cash:"food stalls and small eateries here — cash strongly preferred"}
-    ])}
-    ${planBlock("Afternoon", [
-      {when:"", what:"Nagamachi Samurai District"+pin("Nagamachi Samurai District Kanazawa"), p:"Beautifully preserved samurai house and old earthen‑walled streets. Earthen Wall Lanes (Nagamachi Buke Yashiki‑mura) — very picturesque and narrow cobblestone lanes, and historic water canals. It was once home to middle‑ and high‑ranking samurai families serving the Kaga Domain during the Edo period."},
-      {when:"", what:"Nomura Samurai House (Nomura‑ke)"+pin("Nomura Samurai House Kanazawa"), p:"", hours:"October–March: 8:30–16:30, last entry 30 min before close · ¥550 (~£2.80)"},
-      {when:"", what:"Oyama Shrine"+pin("Oyama Shrine Kanazawa"), p:"Striking stained‑glass gate near the castle.", hours:"Always open · free"},
-      {when:"", what:"Kazuemachi Chaya District"+pin("Kazuemachi Chaya District Kanazawa"), p:"Riverside teahouse street."}
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Nishi Chaya District"+pin("Nishi Chaya District Kanazawa"), p:"Quieter, smaller teahouse district for an evening wander and dinner options."}
-    ])}
-  `
+  `, [
+    {label:"Morning", cards:[
+      activityCard("d12a0", "", "Kenroku‑en Garden"+pin("Kenrokuen Garden Kanazawa"), "One of Japan's top three gardens, best visited right at opening.", {hours:"Mar 1–Oct 15: 7:00–18:00; Oct 16–Feb: 8:00–17:00 — this visit lands right around the seasonal change, worth a quick check on the day · ¥320 (~£1.65)"}),
+      activityCard("d12a1", "", "Kanazawa Castle Park"+pin("Kanazawa Castle Park"), "Reconstructed castle grounds next to Kenroku‑en.", {hours:"Grounds & main gates free; paid buildings 9:00–16:30, last entry 16:00 · ¥320 (~£1.65), or ¥500 combined with Kenroku‑en"})
+    ]},
+    {label:"Lunch", cards:[
+      activityCard("d12a2", "", "Ōmichō Market"+pin("Omicho Market Kanazawa"), "Kanazawa's kitchen — fresh seafood lunch and stalls.", {cash:"food stalls and small eateries here — cash strongly preferred"})
+    ]},
+    {label:"Afternoon", cards:[
+      activityCard("d12a3", "", "Nagamachi Samurai District"+pin("Nagamachi Samurai District Kanazawa"), "Beautifully preserved samurai house and old earthen‑walled streets. Earthen Wall Lanes (Nagamachi Buke Yashiki‑mura) — very picturesque and narrow cobblestone lanes, and historic water canals. It was once home to middle‑ and high‑ranking samurai families serving the Kaga Domain during the Edo period."),
+      activityCard("d12a4", "", "Nomura Samurai House (Nomura‑ke)"+pin("Nomura Samurai House Kanazawa"), "", {hours:"October–March: 8:30–16:30, last entry 30 min before close · ¥550 (~£2.80)"}),
+      activityCard("d12a5", "", "Oyama Shrine"+pin("Oyama Shrine Kanazawa"), "Striking stained‑glass gate near the castle.", {hours:"Always open · free"}),
+      activityCard("d12a6", "", "Kazuemachi Chaya District"+pin("Kazuemachi Chaya District Kanazawa"), "Riverside teahouse street.")
+    ]},
+    {label:"Evening", cards:[
+      activityCard("d12a7", "", "Nishi Chaya District"+pin("Nishi Chaya District Kanazawa"), "Quieter, smaller teahouse district for an evening wander and dinner options.")
+    ]}
+  ])
 },
 { id:13, date:"13 October", weekday:"Tuesday", month:"OCT", num:13, city:"kan", travel:false, trip:true,
   title:"Kanazawa (day trip: Shirakawa‑go)",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Tuesday, 13 October</div>
     <div class="detail-title">Day trip to Shirakawa‑go</div>
     <span class="badge kan">MORNING/EARLY AFTERNOON · DAY TRIP TO SHIRAKAWA‑GO</span>
-    ${tipBlock("Getting there", [
+  `, [
+    {fixed: tipBlock("Getting there", [
       "By bus from Kanazawa Station, about 75‑80 min each way — tickets to be booked in advance to guarantee seats (Hokutetsu/Nohi). Official adult fare: ¥2,800 one‑way / ¥5,600 return (no discounted round‑trip found) — seat reservations required, especially in October's peak foliage season, so book ahead.",
       "Outbound: 8:40am from Kanazawa Station → Shirakawa‑go around 10:00am. Return: 15:00 from Shirakawa‑go → Kanazawa around 16:30.",
       "Shirakawa‑go is a UNESCO World Heritage village in Gifu Prefecture famous for its gassho‑zukuri farmhouses — steep, thatched roofs (shaped like praying hands, which is what “gassho” means) built to shed heavy snow. The village features carefully preserved buildings over 250 years old. Is still a genuinely lived‑in village — around 700 people still live there — rather than a recreated museum piece, set against a dramatic mountain valley backdrop. Mostly set in Ogimachi Village."+pin("Shirakawa-go Ogimachi")+". Free to walk around — no confirmed entry fee."
-    ])}
-    ${planBlock("In the village", [
-      {when:"", what:"Myōzen‑ji Temple"+pin("Myozenji Temple Shirakawa-go"), p:"A Buddhist temple notable for having the only gassho‑style bell tower and main hall in Japan.", hours:"Apr–Nov: 8:30–17:00 · ¥300 (~£1.55)"},
-      {when:"", what:"Wada House"+pin("Wada House Shirakawa-go"), p:"One of the most prominent and largest houses in the village, open to the public. You can walk through multiple floors to see how a farming family actually lived and worked.", hours:"9:00–17:00 · ¥400 (~£2.05)"},
-      {when:"", what:"Hachiman Shrine Shirakawa"+pin("Hachiman Shrine Shirakawa-go"), p:"A quiet shrine founded over 1,300 years ago, home to an aged cedar tree considered a local natural treasure.", hours:"Free"},
-      {when:"", what:"Shiroyama Viewpoint (Observation Deck)"+pin("Shiroyama Viewpoint Shirakawa-go"), p:"For panoramic view of the village.", hours:"Free via the walking path; optional shuttle bus ¥300 (~£1.55) one‑way"},
-      {when:"", what:"Deai Bridge"+pin("Deai Bridge Shirakawa-go"), p:"Pedestrian suspended bridge with good views of the Shogawa River, surrounding mountains, and traditional gassho‑style houses, with beautiful scenery.", hours:"Free — the main public route into the village"}
-    ])}
-    ${tipBlock("Lunch", [
+    ])},
+    {label:"In the village", cards:[
+      activityCard("d13a0", "", "Myōzen‑ji Temple"+pin("Myozenji Temple Shirakawa-go"), "A Buddhist temple notable for having the only gassho‑style bell tower and main hall in Japan.", {hours:"Apr–Nov: 8:30–17:00 · ¥300 (~£1.55)"}),
+      activityCard("d13a1", "", "Wada House"+pin("Wada House Shirakawa-go"), "One of the most prominent and largest houses in the village, open to the public. You can walk through multiple floors to see how a farming family actually lived and worked.", {hours:"9:00–17:00 · ¥400 (~£2.05)"}),
+      activityCard("d13a2", "", "Hachiman Shrine Shirakawa"+pin("Hachiman Shrine Shirakawa-go"), "A quiet shrine founded over 1,300 years ago, home to an aged cedar tree considered a local natural treasure.", {hours:"Free"}),
+      activityCard("d13a3", "", "Shiroyama Viewpoint (Observation Deck)"+pin("Shiroyama Viewpoint Shirakawa-go"), "For panoramic view of the village.", {hours:"Free via the walking path; optional shuttle bus ¥300 (~£1.55) one‑way"}),
+      activityCard("d13a4", "", "Deai Bridge"+pin("Deai Bridge Shirakawa-go"), "Pedestrian suspended bridge with good views of the Shogawa River, surrounding mountains, and traditional gassho‑style houses, with beautiful scenery.", {hours:"Free — the main public route into the village"})
+    ]},
+    {fixed: tipBlock("Lunch", [
       "To be booked, popular village good places go very fast: specialities — Hida beef and soba.",
       "Smaller village shops and food stalls are typically cash-only or cash-preferred — worth carrying enough yen for the day rather than counting on cards."
-    ])}
-    ${planBlock("Evening", [
-      {when:"", what:"Stroll in our preferred areas", p:"Buy some souvenirs and have dinner."}
-    ])}
-    ${calmBlock("This is the furthest-feeling day of the trip, but it's really just a bus ride each way with a village in between — no language to navigate beyond a ticket counter, and the return bus is the only thing to watch the clock for.")}
-  `
+    ])},
+    {label:"Evening", cards:[
+      activityCard("d13a5", "", "Stroll in our preferred areas", "Buy some souvenirs and have dinner.")
+    ]}
+  ])
 },
 { id:14, date:"14 October", weekday:"Wednesday", month:"OCT", num:14, city:"tok", travel:true,
   title:"Kanazawa → Tokyo",
-  render:()=>`
+  render:()=>renderDayWithProverbs(`
     <div class="detail-date">Wednesday, 14 October</div>
     <div class="detail-title">Kanazawa → Tokyo</div>
     <span class="badge tok">TRAVEL DAY</span>
-    ${transitBlock("Train", [
+  `, [
+    {fixed: transitBlock("Train", [
       { from:{code:"KANAZAWA", time:"10:05"}, to:{code:"TOKYO", time:"12:36"}, train:"Kagayaki 508", dur:"2h 31m" }
-    ])}
-    ${tipBlock("Beyond this point", [
+    ])},
+    {fixed: tipBlock("Beyond this point", [
       "The source plan doesn't yet cover onward travel or a flight home from here — nothing invented in its place."
     ])}
-    ${calmBlock("Almost home. Whatever didn't get ticked off the list along the way wasn't essential — by this point there'll have been more of Japan seen in two weeks than most people manage across a lifetime of trips.")}
-  `
+  ])
 }
 ];
 
@@ -774,7 +961,7 @@ cityOrder.forEach(c => {
   const seg = document.createElement('div');
   seg.className = `seg ${c}`;
   seg.style.flex = cityCounts[c];
-  seg.textContent = CITY_NAMES[c].toUpperCase();
+  seg.innerHTML = `<a class="citylink" href="${CITY_WIKI[c]}" target="_blank" rel="noopener">${CITY_NAMES[c].toUpperCase()}</a>`;
   timeline.appendChild(seg);
 });
 
@@ -843,7 +1030,9 @@ const themeToggle = document.getElementById('themeToggle');
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
     || (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: light)').matches);
-  document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  const next = isLight ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('tripTheme', next); } catch(e){}
 });
 </script>
 
