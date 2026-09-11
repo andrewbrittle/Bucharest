@@ -233,7 +233,7 @@
   .section-label{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin:20px 0 8px; }
   .section-label:first-child{ margin-top:0; }
 
-  .block--activity{ border-left:3px solid var(--status-blue); }
+  .block--activity{ border-left:3px solid var(--status-blue); position:relative; }
   .block--activity.status-default{ border-left-color:var(--status-blue); }
   .block--activity.status-done{ border-left-color:var(--transit-border); }
   .block--activity.status-skipped{ border-left-color:var(--status-skip); }
@@ -344,6 +344,70 @@
   .result-main{ font-family:'Fraunces', serif; font-size:22px; font-weight:600; }
   .result-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
   .result-divider{ height:1px; background:var(--line); margin:12px 0; }
+
+  /* ---- quick-add / notes ---- */
+  .quickadd-row{ display:flex; gap:8px; }
+  .quickadd-input{
+    flex:1; min-width:0; padding:9px 11px; border-radius:8px; border:1px solid var(--line);
+    background:var(--surface-hi); color:var(--text); font-family:inherit; font-size:13.5px;
+  }
+  .quickadd-input::placeholder{ color:var(--text-faint); }
+  .quickadd-input:focus{ outline:none; border-color:var(--kan); }
+  .quickadd-btn{
+    padding:9px 16px; border-radius:8px; border:1px solid var(--kan); background:var(--kan); color:var(--bg);
+    font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:transform .15s ease;
+  }
+  .quickadd-btn:active{ transform:scale(0.94); }
+
+  .notes-textarea{
+    display:block; width:100%; box-sizing:border-box; min-height:72px; resize:vertical;
+    font-family:inherit; font-size:13.5px; line-height:1.5; color:var(--text);
+    background:var(--surface-hi); border:1px solid var(--line); border-radius:10px; padding:10px 11px;
+  }
+  .notes-textarea::placeholder{ color:var(--text-faint); }
+  .notes-textarea:focus{ outline:none; border-color:var(--kan); }
+
+  .qa-delete{
+    position:absolute; top:10px; right:12px;
+    width:22px; height:22px; border-radius:50%;
+    border:none; background:none;
+    color:var(--text-faint); font-size:17px; line-height:1;
+    cursor:pointer;
+  }
+  .qa-delete:active{ color:var(--text); transform:scale(0.85); }
+
+  /* ---- export ---- */
+  .export-toggle{
+    position:fixed; top:22px; right:116px; width:38px; height:38px; border-radius:50%;
+    background:var(--toggle-bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:20; color:var(--toggle-icon);
+    transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+  }
+  .export-toggle svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .export-toggle:active{ transform:scale(0.92); }
+  .export-toggle.selected{ background:var(--kan); color:var(--bg); border-color:var(--kan); }
+
+  .export-panel{
+    position:fixed; top:68px; right:20px; width:min(340px, calc(100vw - 40px)); max-height:calc(100vh - 90px);
+    overflow-y:auto; background:var(--surface); border:1px solid var(--dropdown-border); border-radius:14px; padding:16px;
+    z-index:25; box-shadow:var(--dropdown-shadow); animation:panelIn .2s ease;
+  }
+  .export-panel[hidden]{ display:none; }
+  .export-textarea{
+    display:block; width:100%; box-sizing:border-box; min-height:140px; resize:vertical;
+    font-family:'IBM Plex Mono', 'SF Mono', monospace; font-size:11px; line-height:1.5;
+    color:var(--text-dim); background:var(--surface-hi); border:1px solid var(--line); border-radius:10px; padding:10px;
+    margin-bottom:10px;
+  }
+  .export-textarea:focus{ outline:none; border-color:var(--kan); }
+  .export-actions{ display:flex; gap:8px; }
+  .export-btn{
+    flex:1; padding:9px 0; border-radius:8px; border:1px solid var(--line); background:var(--surface-hi);
+    color:var(--text); font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .export-btn:active{ transform:scale(0.96); }
+  .export-status{ font-size:11px; color:var(--text-faint); margin-top:8px; min-height:14px; text-align:center; }
 </style>
 </head>
 <body>
@@ -379,6 +443,22 @@
       <div class="result-main" id="taxFreeMain"></div>
       <div class="result-sub" id="taxFreeSub"></div>
     </div>
+  </div>
+</div>
+
+<button class="export-toggle" id="exportToggle" type="button" aria-label="Export updates">
+  <svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg>
+</button>
+<div class="export-panel" id="exportPanel" hidden>
+  <div class="money-section">
+    <div class="block-label">Export updates</div>
+    <div class="money-sub">Copy this and paste it into a chat with Claude to research anything new and fold it into the plan permanently.</div>
+    <textarea class="export-textarea" id="exportText" readonly></textarea>
+    <div class="export-actions">
+      <button type="button" class="export-btn" id="copyExportBtn" onclick="copyExport()">Copy</button>
+      <button type="button" class="export-btn" id="downloadExportBtn" onclick="downloadExport()">Download</button>
+    </div>
+    <div class="export-status" id="exportStatus"></div>
   </div>
 </div>
 
@@ -480,6 +560,7 @@ function activityCard(pid, when, titleHtml, bodyText, opts){
   const dimClass = status !== 'default' ? ' is-dimmed' : '';
   const glyphs = { default:'–', done:'✓', skipped:'✕' };
   return `<div class="block block--activity status-${status}${dimClass}" data-pid="${pid}">
+      ${opts.extraHtml || ''}
       <div class="plan">
         <div class="when">
           <div class="status-marker state-${status}" onclick="toggleStatus('${pid}')">${glyphs[status]}</div>
@@ -512,6 +593,69 @@ function toggleStatus(pid){
   const marker = cardEl.querySelector('.status-marker');
   marker.className = `status-marker state-${next}`;
   marker.textContent = glyphs[next];
+}
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ---- quick-add: lightweight new activities, added on the day, kept separate from the researched plan ----
+function getQuickAdds(dayId){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  return all[dayId] || [];
+}
+function addQuickActivity(dayId){
+  const input = document.getElementById(`quickAddInput-${dayId}`);
+  const val = (input.value || '').trim();
+  if (!val) return;
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  if (!all[dayId]) all[dayId] = [];
+  all[dayId].push({ id: 'q' + Date.now(), title: val });
+  try { localStorage.setItem('tripQuickAdds', JSON.stringify(all)); } catch(e){}
+  selectDay(dayId); // full re-render is fine here — this is a deliberate action, not a frequent toggle
+}
+function removeQuickActivity(dayId, id){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  if (all[dayId]) all[dayId] = all[dayId].filter(qa => qa.id !== id);
+  try { localStorage.setItem('tripQuickAdds', JSON.stringify(all)); } catch(e){}
+  // tidy up any status recorded against the deleted card, so it doesn't linger in the export
+  let statusAll = {};
+  try { statusAll = JSON.parse(localStorage.getItem('tripActivityStatus') || '{}'); } catch(e){}
+  delete statusAll[id];
+  try { localStorage.setItem('tripActivityStatus', JSON.stringify(statusAll)); } catch(e){}
+  statusStore = statusAll; // keep the in-memory copy in sync too
+  selectDay(dayId);
+}
+function renderQuickAddBox(dayId){
+  return `<div class="block quickadd-block">
+        <div class="block-label">Add something</div>
+        <div class="quickadd-row">
+          <input type="text" id="quickAddInput-${dayId}" class="quickadd-input" placeholder="e.g. a place someone recommended">
+          <button class="quickadd-btn" type="button" onclick="addQuickActivity(${dayId})">Add</button>
+        </div>
+      </div>`;
+}
+
+// ---- notes: free text per day, persisted ----
+function getNote(dayId){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripNotes') || '{}'); } catch(e){}
+  return all[dayId] || '';
+}
+function saveNote(dayId, value){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripNotes') || '{}'); } catch(e){}
+  all[dayId] = value;
+  try { localStorage.setItem('tripNotes', JSON.stringify(all)); } catch(e){}
+}
+function renderNotesBox(dayId){
+  return `<div class="block notes-block">
+        <div class="block-label">Notes</div>
+        <textarea class="notes-textarea" id="notesInput-${dayId}" placeholder="Anything to remember about today..." oninput="saveNote(${dayId}, this.value)">${escapeHtml(getNote(dayId))}</textarea>
+      </div>`;
 }
 
 // ---- calming proverb cards: randomised per view, not persisted ----
@@ -1124,8 +1268,17 @@ function selectDay(id){
   const d = days[id];
   const prev = days[id-1];
   const next = days[id+1];
+  const cityName = CITY_NAMES[d.city] || '';
+  const quickAddCards = getQuickAdds(id).map(qa =>
+    activityCard(qa.id, "Added", `${escapeHtml(qa.title)}${pin(`${qa.title} ${cityName}`)}`, "", {
+      extraHtml: `<button class="qa-delete" type="button" onclick="removeQuickActivity(${id}, '${qa.id}')" aria-label="Remove">×</button>`
+    })
+  );
   panel.innerHTML = `
     ${d.render()}
+    ${quickAddCards.length ? `<div class="section-label">Added</div>${quickAddCards.join('')}` : ''}
+    ${renderNotesBox(id)}
+    ${renderQuickAddBox(id)}
     <div class="navrow">
       <button class="navbtn ${prev ? '' : 'hidden'}" onclick="selectDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
       <button class="navbtn next ${next ? '' : 'hidden'}" onclick="selectDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
@@ -1241,7 +1394,10 @@ dirGbp2Yen.addEventListener('click', () => setMoneyDirection('gbp2yen'));
 moneyToggle.addEventListener('click', (e) => {
   e.stopPropagation();
   const isHidden = moneyPanel.hasAttribute('hidden');
-  if (isHidden){ moneyPanel.removeAttribute('hidden'); moneyToggle.classList.add('selected'); }
+  if (isHidden){
+    exportPanel.setAttribute('hidden', ''); exportToggle.classList.remove('selected');
+    moneyPanel.removeAttribute('hidden'); moneyToggle.classList.add('selected');
+  }
   else { moneyPanel.setAttribute('hidden', ''); moneyToggle.classList.remove('selected'); }
 });
 document.addEventListener('click', (e) => {
@@ -1249,6 +1405,65 @@ document.addEventListener('click', (e) => {
   if (moneyPanel.contains(e.target) || e.target === moneyToggle) return;
   moneyPanel.setAttribute('hidden', '');
   moneyToggle.classList.remove('selected');
+});
+
+// ---- export: gather local changes into JSON to hand back to a Claude conversation ----
+const exportToggle = document.getElementById('exportToggle');
+const exportPanel = document.getElementById('exportPanel');
+const exportText = document.getElementById('exportText');
+const exportStatus = document.getElementById('exportStatus');
+
+function gatherExportData(){
+  function readJSON(key){
+    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch(e){ return {}; }
+  }
+  return {
+    exportedAt: new Date().toISOString(),
+    quickAdds: readJSON('tripQuickAdds'),
+    notes: readJSON('tripNotes'),
+    activityStatus: readJSON('tripActivityStatus'),
+    bookingRefs: readJSON('tripBookingRefs')
+  };
+}
+
+function refreshExportText(){
+  exportText.value = JSON.stringify(gatherExportData(), null, 2);
+  exportStatus.textContent = '';
+}
+
+function copyExport(){
+  exportText.select();
+  let copied = false;
+  try { navigator.clipboard.writeText(exportText.value); copied = true; } catch(e){}
+  if (!copied){ try { copied = document.execCommand('copy'); } catch(e){} }
+  exportStatus.textContent = copied ? 'Copied — paste it into a chat with Claude.' : 'Select the text above and copy manually.';
+}
+
+function downloadExport(){
+  const blob = new Blob([exportText.value], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'trip-updates.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  exportStatus.textContent = "Downloaded — send this file over when you're ready.";
+}
+
+exportToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isHidden = exportPanel.hasAttribute('hidden');
+  if (isHidden){
+    moneyPanel.setAttribute('hidden', ''); moneyToggle.classList.remove('selected');
+    refreshExportText();
+    exportPanel.removeAttribute('hidden'); exportToggle.classList.add('selected');
+  }
+  else { exportPanel.setAttribute('hidden', ''); exportToggle.classList.remove('selected'); }
+});
+document.addEventListener('click', (e) => {
+  if (exportPanel.hasAttribute('hidden')) return;
+  if (exportPanel.contains(e.target) || e.target === exportToggle) return;
+  exportPanel.setAttribute('hidden', '');
+  exportToggle.classList.remove('selected');
 });
 </script>
 
