@@ -228,7 +228,20 @@
   .block--activity.status-default{ border-left-color:var(--status-blue); }
   .block--activity.status-done{ border-left-color:var(--transit-border); }
   .block--activity.status-skipped{ border-left-color:var(--status-skip); }
-  .block--activity.is-dimmed .what{ opacity:.55; }
+  .block--activity.is-dimmed .what strong{ opacity:.65; }
+
+  .collapsible{
+    display:grid;
+    grid-template-rows:1fr;
+    transition:grid-template-rows .28s ease;
+  }
+  .collapsible-inner{
+    overflow:hidden;
+    min-height:0;
+  }
+  .block--activity.is-dimmed .collapsible{
+    grid-template-rows:0fr;
+  }
 
   .status-marker{
     width:22px; height:22px; border-radius:50%;
@@ -442,10 +455,12 @@ function activityCard(pid, when, titleHtml, bodyText, opts){
         </div>
         <div class="what">
           <strong>${titleHtml}</strong>
-          ${bodyText ? `<p>${bodyText}</p>` : ''}
-          ${opts.alt ? `<span class="alt">Alternatively: ${opts.alt}</span>` : ''}
-          ${opts.hours ? `<span class="hours">${opts.hours}</span>` : ''}
-          ${opts.cash ? `<span class="cash">💴 ${opts.cash}</span>` : ''}
+          <div class="collapsible"><div class="collapsible-inner">
+            ${bodyText ? `<p>${bodyText}</p>` : ''}
+            ${opts.alt ? `<span class="alt">Alternatively: ${opts.alt}</span>` : ''}
+            ${opts.hours ? `<span class="hours">${opts.hours}</span>` : ''}
+            ${opts.cash ? `<span class="cash">💴 ${opts.cash}</span>` : ''}
+          </div></div>
         </div>
       </div>
     </div>`;

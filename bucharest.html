@@ -503,7 +503,20 @@
   .block--activity.status-default{ border-left-color:var(--status-blue); }
   .block--activity.status-done{ border-left-color:var(--flight-border); }
   .block--activity.status-skipped{ border-left-color:var(--status-skip); }
-  .block--activity.is-dimmed .what{ opacity:.55; }
+  .block--activity.is-dimmed .what strong{ opacity:.65; }
+
+  .collapsible{
+    display:grid;
+    grid-template-rows:1fr;
+    transition:grid-template-rows .28s ease;
+  }
+  .collapsible-inner{
+    overflow:hidden;
+    min-height:0;
+  }
+  .block--activity.is-dimmed .collapsible{
+    grid-template-rows:0fr;
+  }
 
   /* ---- Proverb cards ---- */
   .proverb{
@@ -849,7 +862,10 @@ function activityCard(pid, when, titleHtml, bodyHtml, hoursText){
             <div class="status-marker state-${status}" onclick="toggleStatus('${pid}')">${glyphs[status]}</div>
             <div class="when-label">${when}</div>
           </div>
-          <div class="what"><strong>${titleHtml}</strong>${bodyHtml}${hoursText ? `<span class="hours">${hoursText}</span>` : ''}</div>
+          <div class="what">
+            <strong>${titleHtml}</strong>
+            <div class="collapsible"><div class="collapsible-inner">${bodyHtml}${hoursText ? `<span class="hours">${hoursText}</span>` : ''}</div></div>
+          </div>
         </div>
       </div>`;
 }
