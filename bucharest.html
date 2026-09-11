@@ -513,7 +513,22 @@
   .status-marker.state-done{ border-color:var(--flight-border); background:var(--flight-border); color:#fff; }
   .status-marker.state-skipped{ border-color:var(--status-skip); background:var(--status-skip); color:#fff; }
 
-  .block--activity{ border-left:3px solid var(--status-blue); }
+  .block--activity{ border-left:3px solid var(--status-blue); position:relative; }
+  .qa-delete{
+    position:absolute;
+    top:10px;
+    right:12px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:none;
+    background:none;
+    color:var(--text-faint);
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .qa-delete:active{ color:var(--text); transform:scale(0.85); }
   .block--activity.status-default{ border-left-color:var(--status-blue); }
   .block--activity.status-done{ border-left-color:var(--flight-border); }
   .block--activity.status-skipped{ border-left-color:var(--status-skip); }
@@ -598,6 +613,49 @@
   .alt-item:last-child{ border-bottom:none; }
   .alt-name{ font-weight:600; }
   .alt-note{ color:var(--text-dim); }
+
+  /* ---- Quick-add + notes ---- */
+  .quickadd-row{
+    display:flex;
+    gap:8px;
+  }
+  .quickadd-input{
+    flex:1;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface-hi);
+    color:var(--text);
+    font-family:inherit;
+    font-size:13px;
+  }
+  .quickadd-input::placeholder{ color:var(--text-faint); }
+  .quickadd-btn{
+    padding:8px 16px;
+    border-radius:8px;
+    border:1px solid var(--flight-border);
+    background:var(--flight-bg);
+    color:var(--flight-icon);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .quickadd-btn:active{ transform:scale(0.96); }
+  .notes-textarea{
+    width:100%;
+    min-height:64px;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface-hi);
+    color:var(--text);
+    font-family:inherit;
+    font-size:13.5px;
+    line-height:1.5;
+    resize:vertical;
+  }
+  .notes-textarea::placeholder{ color:var(--text-faint); }
 
   .open-day{
     padding:30px 4px;
@@ -715,6 +773,82 @@
     stroke-linecap:round;
     stroke-linejoin:round;
   }
+
+  .export-toggle{
+    position:fixed;
+    top:22px;
+    right:116px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:var(--toggle-bg);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:20;
+    transition:background .25s ease, border-color .25s ease, transform .15s ease;
+  }
+  .export-toggle:active{ transform:scale(0.92); }
+  .export-toggle svg{
+    width:18px;
+    height:18px;
+    stroke:var(--toggle-icon);
+    fill:none;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .export-panel{
+    position:fixed;
+    top:66px;
+    right:20px;
+    width:280px;
+    background:var(--surface);
+    border:1px solid var(--dropdown-border);
+    border-radius:14px;
+    padding:16px;
+    z-index:21;
+    box-shadow:var(--dropdown-shadow);
+    display:none;
+  }
+  .export-panel.open{ display:block; }
+  .export-desc{
+    font-size:12px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin-bottom:12px;
+  }
+  .export-textarea{
+    width:100%;
+    height:110px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface-hi);
+    color:var(--text-dim);
+    font-family:monospace;
+    font-size:10.5px;
+    line-height:1.4;
+    resize:vertical;
+    margin-bottom:10px;
+  }
+  .export-btn-row{
+    display:flex;
+    gap:8px;
+  }
+  .export-btn-secondary{
+    background:none;
+    border-color:var(--line);
+    color:var(--text-dim);
+  }
+  .export-status{
+    font-size:11.5px;
+    color:var(--flight-border);
+    margin-top:8px;
+    min-height:14px;
+  }
   .fx-panel{
     position:fixed;
     top:66px;
@@ -816,6 +950,10 @@
   <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.5c.5 1 1.5 1.5 2.5 1.5 1.5 0 2.5-.8 2.5-2s-1-1.7-2.5-2-2.5-.8-2.5-2 1-2 2.5-2c1 0 2 .5 2.5 1.5"/><path d="M12 6.5v1M12 16.5v1"/></svg>
 </button>
 
+<button class="export-toggle" id="exportToggle" aria-label="Export local changes">
+  <svg viewBox="0 0 24 24"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+</button>
+
 <div class="fx-panel" id="fxPanel">
   <div class="fx-label">Exchange rate</div>
   <div class="fx-currency-row">
@@ -833,6 +971,17 @@
   </div>
   <input type="number" class="fx-amount-input" id="fxAmountInput" placeholder="0" oninput="onFxAmountInput()">
   <div class="fx-result" id="fxResult">→ 0.00</div>
+</div>
+
+<div class="export-panel" id="exportPanel">
+  <div class="fx-label">Export local changes</div>
+  <div class="export-desc">Anything added, or written in Notes, on this device — paste this into a chat with Claude to have it researched properly and folded into the main plan.</div>
+  <textarea class="export-textarea" id="exportText" readonly></textarea>
+  <div class="export-btn-row">
+    <button class="quickadd-btn" onclick="copyExport()">Copy</button>
+    <button class="quickadd-btn export-btn-secondary" onclick="downloadExport()">Download .json</button>
+  </div>
+  <div class="export-status" id="exportStatus"></div>
 </div>
 
 <div class="app">
@@ -883,11 +1032,12 @@ function flightRefInputs(flightId){
   return `<input type="text" class="ref-input" placeholder="Ref" value="${r}" oninput="saveFlightRef('${flightId}', this.value)">`;
 }
 
-function activityCard(pid, when, titleHtml, bodyHtml, hoursText){
+function activityCard(pid, when, titleHtml, bodyHtml, hoursText, extraHtml){
   const status = getStatus(pid);
   const dimClass = status !== 'default' ? ' is-dimmed' : '';
   const glyphs = { default:'–', done:'✓', skipped:'✕' };
   return `<div class="block block--activity status-${status}${dimClass}" data-pid="${pid}">
+        ${extraHtml || ''}
         <div class="plan">
           <div class="when">
             <div class="status-marker state-${status}" onclick="toggleStatus('${pid}')">${glyphs[status]}</div>
@@ -1572,14 +1722,81 @@ function renderAlternatives(dayId){
   return `<div class="block alt-block"><div class="block-label">A few more options</div>${rows}</div>`;
 }
 
+// ---- Quick-add: on-the-fly extra activities per day, persisted locally ----
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getQuickAdds(dayId){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  return all[dayId] || [];
+}
+function addQuickActivity(dayId){
+  const input = document.getElementById(`quickAddInput-${dayId}`);
+  const val = (input.value || '').trim();
+  if (!val) return;
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  if (!all[dayId]) all[dayId] = [];
+  all[dayId].push({ id: 'q' + Date.now(), title: val });
+  try { localStorage.setItem('tripQuickAdds', JSON.stringify(all)); } catch(e){}
+  selectDay(dayId);
+}
+function removeQuickActivity(dayId, id){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripQuickAdds') || '{}'); } catch(e){}
+  if (all[dayId]) all[dayId] = all[dayId].filter(qa => qa.id !== id);
+  try { localStorage.setItem('tripQuickAdds', JSON.stringify(all)); } catch(e){}
+  // tidy up any status recorded against the deleted card, so it doesn't linger in the export
+  let statusAll = {};
+  try { statusAll = JSON.parse(localStorage.getItem('tripActivityStatus') || '{}'); } catch(e){}
+  delete statusAll[id];
+  try { localStorage.setItem('tripActivityStatus', JSON.stringify(statusAll)); } catch(e){}
+  statusStore = statusAll;
+  selectDay(dayId);
+}
+function renderQuickAddBox(dayId){
+  return `<div class="block quickadd-block">
+        <div class="block-label">Add something</div>
+        <div class="quickadd-row">
+          <input type="text" id="quickAddInput-${dayId}" class="quickadd-input" placeholder="e.g. a place someone recommended">
+          <button class="quickadd-btn" onclick="addQuickActivity(${dayId})">Add</button>
+        </div>
+      </div>`;
+}
+
+// ---- Notes: free text per day, persisted locally ----
+function getNote(dayId){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripNotes') || '{}'); } catch(e){}
+  return all[dayId] || '';
+}
+function saveNote(dayId, value){
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('tripNotes') || '{}'); } catch(e){}
+  all[dayId] = value;
+  try { localStorage.setItem('tripNotes', JSON.stringify(all)); } catch(e){}
+}
+function renderNotesBox(dayId){
+  return `<div class="block notes-block">
+        <div class="block-label">Notes</div>
+        <textarea class="notes-textarea" id="notesInput-${dayId}" placeholder="Anything to remember about today..." oninput="saveNote(${dayId}, this.value)">${escapeHtml(getNote(dayId))}</textarea>
+      </div>`;
+}
+
 function renderDayContent(d){
   const proverbSet = d.city === "buc" ? romanianProverbs : bulgarianProverbs;
-  const cards = d.cards();
+  const cityName = d.city === "sof" ? "Sofia" : "Bucharest";
+  const quickAdds = getQuickAdds(d.id).map(qa =>
+    activityCard(qa.id, "Added", `${escapeHtml(qa.title)}${pin(`${qa.title} ${cityName}`)}`, "", "",
+      `<button class="qa-delete" onclick="removeQuickActivity(${d.id}, '${qa.id}')" aria-label="Remove">×</button>`)
+  );
+  const cards = [...d.cards(), ...quickAdds];
   const midProverb = proverbCardHtml(randomProverb(proverbSet));
   const bottomProverb = proverbCardHtml(randomProverb(proverbSet));
   const insertAt = cards.length > 1 ? 1 + Math.floor(Math.random() * (cards.length - 1)) : cards.length;
   const withMid = [...cards.slice(0, insertAt), midProverb, ...cards.slice(insertAt)];
-  return d.header + withMid.join("") + bottomProverb + renderAlternatives(d.id);
+  return d.header + withMid.join("") + bottomProverb + renderAlternatives(d.id) + renderQuickAddBox(d.id) + renderNotesBox(d.id);
 }
 
 const romanianCategories = [
@@ -1909,6 +2126,7 @@ const moneyToggle = document.getElementById('moneyToggle');
 moneyToggle.addEventListener('click', (e) => {
   e.stopPropagation();
   const opening = !fxPanel.classList.contains('open');
+  exportPanel.classList.remove('open');
   fxPanel.classList.toggle('open');
   if (opening){
     // Currency matches whichever day is currently open, if any; direction keeps whatever was last used
@@ -1918,9 +2136,69 @@ moneyToggle.addEventListener('click', (e) => {
     fxRefreshUI();
   }
 });
+
+// ---- Export local changes ----
+const exportToggle = document.getElementById('exportToggle');
+const exportPanel = document.getElementById('exportPanel');
+const exportText = document.getElementById('exportText');
+const exportStatus = document.getElementById('exportStatus');
+
+function gatherExportData(){
+  function readJSON(key){
+    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch(e){ return {}; }
+  }
+  return {
+    exportedAt: new Date().toISOString(),
+    quickAdds: readJSON('tripQuickAdds'),
+    notes: readJSON('tripNotes'),
+    activityStatus: readJSON('tripActivityStatus'),
+    flightRefs: readJSON('tripFlightRefs')
+  };
+}
+
+exportToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const opening = !exportPanel.classList.contains('open');
+  fxPanel.classList.remove('open');
+  exportPanel.classList.toggle('open');
+  if (opening){
+    exportText.value = JSON.stringify(gatherExportData(), null, 2);
+    exportStatus.textContent = '';
+  }
+});
+
+function copyExport(){
+  exportText.select();
+  let copied = false;
+  try {
+    navigator.clipboard.writeText(exportText.value);
+    copied = true;
+  } catch(e){}
+  if (!copied){
+    try { copied = document.execCommand('copy'); } catch(e){}
+  }
+  exportStatus.textContent = copied ? 'Copied — paste it into a chat with Claude.' : 'Select the text above and copy manually.';
+}
+
+function downloadExport(){
+  const blob = new Blob([exportText.value], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'trip-updates.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  exportStatus.textContent = 'Downloaded — send this file over when you\'re ready.';
+}
+
 document.addEventListener('click', (e) => {
   if (fxPanel.classList.contains('open') && !fxPanel.contains(e.target) && e.target !== moneyToggle){
     fxPanel.classList.remove('open');
+  }
+  if (exportPanel.classList.contains('open') && !exportPanel.contains(e.target) && e.target !== exportToggle){
+    exportPanel.classList.remove('open');
   }
 });
 </script>
