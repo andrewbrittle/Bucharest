@@ -191,12 +191,21 @@
   .route .pt{ text-align:center; }
   .route .pt .code{ font-family:'Fraunces', serif; font-size:19px; font-weight:500; }
   .route .pt .time{ font-size:13.5px; color:var(--text-dim); margin-top:2px; }
+  .route .pt .tz{ font-size:10.5px; color:var(--text-faint); margin-top:1px; }
   .route .mid{ flex:1; display:flex; flex-direction:column; align-items:center; padding:0 10px; color:var(--text-faint); }
   .route .mid .line{ width:100%; height:1px; background:var(--line); position:relative; margin:4px 0; }
   .route .mid .line:after{ content:"🚅"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--transit-bg); padding:0 6px; font-size:13px; }
   .route .mid .dur{ font-size:11.5px; }
   .change{ font-size:11.5px; color:var(--text-faint); text-align:center; padding:6px 0; font-style:italic; }
-  .meta-row{ display:flex; justify-content:space-between; font-size:13.5px; color:var(--text-dim); padding-top:9px; border-top:1px solid var(--line); margin-top:9px; }
+  .meta-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13.5px; color:var(--text-dim); padding-top:9px; border-top:1px solid var(--line); margin-top:9px; }
+
+  .ref-input{
+    width:90px; flex-shrink:0; padding:4px 8px; border-radius:6px;
+    border:1px solid var(--line); background:var(--surface-hi); color:var(--text);
+    font-family:inherit; font-size:12px; text-align:center;
+  }
+  .ref-input::placeholder{ color:var(--text-faint); }
+  .ref-input:focus{ outline:none; border-color:var(--kan); }
 
   .hotel-name{ font-family:'Fraunces', serif; font-size:19px; font-weight:500; margin-bottom:6px; }
   .addr{ font-size:14px; color:var(--text-dim); margin-bottom:10px; }
@@ -422,11 +431,11 @@ function transitBlock(label, legs){
     ${i > 0 ? `<div class="change">Change at ${leg.changeAt || leg.from.code} — ${leg.changeGap || ''}</div>` : ''}
     <div class="leg">
       <div class="route">
-        <div class="pt"><div class="code">${leg.from.code}</div><div class="time">${leg.from.time}</div></div>
+        <div class="pt"><div class="code">${leg.from.code}</div><div class="time">${leg.from.time}</div>${leg.from.tz ? `<div class="tz">${leg.from.tz}</div>` : ''}</div>
         <div class="mid"><div class="line"></div><div class="dur">${leg.dur}</div></div>
-        <div class="pt"><div class="code">${leg.to.code}</div><div class="time">${leg.to.time}</div></div>
+        <div class="pt"><div class="code">${leg.to.code}</div><div class="time">${leg.to.time}</div>${leg.to.tz ? `<div class="tz">${leg.to.tz}</div>` : ''}</div>
       </div>
-      <div class="meta-row"><span>${leg.train}</span><span>${leg.note || ''}</span></div>
+      <div class="meta-row"><span>${leg.train}</span>${leg.refId ? bookingRefInput(leg.refId) : `<span>${leg.note || ''}</span>`}</div>
     </div>
   `).join('');
   return `<div class="block block--transit"><div class="block-label">${label}</div>${legsHtml}</div>`;
@@ -434,6 +443,29 @@ function transitBlock(label, legs){
 
 function tipBlock(label, tips){
   return `<div class="block"><div class="block-label">${label}</div>${tips.map(t=>`<div class="tip">${t}</div>`).join('')}</div>`;
+}
+
+// ---- booking references: one per reserved leg/journey, persisted, blank by default ----
+function getBookingRef(id){
+  let refs = {};
+  try { refs = JSON.parse(localStorage.getItem('tripBookingRefs') || '{}'); } catch(e){}
+  return refs[id] || '';
+}
+function saveBookingRef(id, value){
+  let refs = {};
+  try { refs = JSON.parse(localStorage.getItem('tripBookingRefs') || '{}'); } catch(e){}
+  refs[id] = value;
+  try { localStorage.setItem('tripBookingRefs', JSON.stringify(refs)); } catch(e){}
+}
+function bookingRefInput(id){
+  const r = getBookingRef(id);
+  return `<input type="text" class="ref-input" placeholder="Ref" value="${r}" oninput="saveBookingRef('${id}', this.value)">`;
+}
+function refBlock(label, id){
+  return `<div class="block" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+    <div class="block-label" style="margin-bottom:0;">${label}</div>
+    ${bookingRefInput(id)}
+  </div>`;
 }
 
 // ---- activity status: default (blue) / done (green) / skipped (grey), persisted ----
@@ -687,7 +719,7 @@ const days = [
     <span class="badge kyo">TRAVEL DAY · TOKYO → KYOTO</span>
   `, [
     {fixed: transitBlock("Train", [
-      { from:{code:"TOKYO", time:"10:12"}, to:{code:"KYOTO", time:"12:23"}, train:"Nazomi 23", dur:"2h 11m" }
+      { from:{code:"TOKYO", time:"10:12"}, to:{code:"KYOTO", time:"12:23"}, train:"Nazomi 23", dur:"2h 11m", refId:"d4-tokyo-kyoto" }
     ])},
     {fixed: hotelBlock("Tokyu Stay Sanjo‑Karasuma", "Tokyu Stay Sanjo Karasuma Kyoto", null, "3:00pm", null)},
     {label:"Rest of the day", cards:[
@@ -816,8 +848,8 @@ const days = [
     <span class="badge tak">TRAVEL DAY · KYOTO → TAKAYAMA</span>
   `, [
     {fixed: transitBlock("Train (one change)", [
-      { from:{code:"KYOTO", time:"09:33"}, to:{code:"NAGOYA", time:"10:25"}, train:"Hikari 644", dur:"52m" },
-      { from:{code:"NAGOYA", time:"10:48"}, to:{code:"TAKAYAMA", time:"13:15"}, train:"Hida 7", dur:"2h 27m", changeAt:"Nagoya", changeGap:"23 min to change" }
+      { from:{code:"KYOTO", time:"09:33"}, to:{code:"NAGOYA", time:"10:25"}, train:"Hikari 644", dur:"52m", refId:"d9-kyoto-nagoya" },
+      { from:{code:"NAGOYA", time:"10:48"}, to:{code:"TAKAYAMA", time:"13:15"}, train:"Hida 7", dur:"2h 27m", changeAt:"Nagoya", changeGap:"23 min to change", refId:"d9-nagoya-takayama" }
     ])},
     {fixed: tipBlock("Worth double‑checking", [
       "The Kyoto‑side doc gives the Takayama arrival as 13:12pm; the Takayama‑side doc gives 13:15. Both say the same route (Hikari 644 to Nagoya, change to Hida 7) — just flagging the small mismatch between the two source documents rather than picking one."
@@ -871,8 +903,8 @@ const days = [
       activityCard("d11a5", "", "Higashiyama Walking Course"+pin("Higashiyama Walking Course Takayama"), "A 3.5‑kilometer (2.2 mile) self‑guided trail in Takayama. It takes about 1.5 to 2 hours to complete. The path leads through a quiet historic temple district, peaceful backstreets, and the forested hills of Shiroyama Park.")
     ]},
     {fixed: transitBlock("Train (one change)", [
-      { from:{code:"TAKAYAMA", time:"15:17"}, to:{code:"TOYAMA", time:"16:44"}, train:"Hida 11", dur:"1h 27m" },
-      { from:{code:"TOYAMA", time:"17:31"}, to:{code:"KANAZAWA", time:"17:53"}, train:"Tsuguri 39", dur:"22m", changeAt:"Toyama", changeGap:"47 min to change" }
+      { from:{code:"TAKAYAMA", time:"15:17"}, to:{code:"TOYAMA", time:"16:44"}, train:"Hida 11", dur:"1h 27m", refId:"d11-takayama-toyama" },
+      { from:{code:"TOYAMA", time:"17:31"}, to:{code:"KANAZAWA", time:"17:53"}, train:"Tsuguri 39", dur:"22m", changeAt:"Toyama", changeGap:"47 min to change", refId:"d11-toyama-kanazawa" }
     ])},
     {fixed: hotelBlock("Hotel Torifito Kanazawa", "Hotel Torifito Kanazawa", null, null, null)},
     {label:"Evening", cards:[
@@ -917,6 +949,7 @@ const days = [
       "Outbound: 8:40am from Kanazawa Station → Shirakawa‑go around 10:00am. Return: 15:00 from Shirakawa‑go → Kanazawa around 16:30.",
       "Shirakawa‑go is a UNESCO World Heritage village in Gifu Prefecture famous for its gassho‑zukuri farmhouses — steep, thatched roofs (shaped like praying hands, which is what “gassho” means) built to shed heavy snow. The village features carefully preserved buildings over 250 years old. Is still a genuinely lived‑in village — around 700 people still live there — rather than a recreated museum piece, set against a dramatic mountain valley backdrop. Mostly set in Ogimachi Village."+pin("Shirakawa-go Ogimachi")+". Free to walk around — no confirmed entry fee."
     ])},
+    {fixed: refBlock("Bus booking reference", "d13-kanazawa-shirakawago")},
     {label:"In the village", cards:[
       activityCard("d13a0", "", "Myōzen‑ji Temple"+pin("Myozenji Temple Shirakawa-go"), "A Buddhist temple notable for having the only gassho‑style bell tower and main hall in Japan.", {hours:"Apr–Nov: 8:30–17:00 · ¥300 (~£1.55)"}),
       activityCard("d13a1", "", "Wada House"+pin("Wada House Shirakawa-go"), "One of the most prominent and largest houses in the village, open to the public. You can walk through multiple floors to see how a farming family actually lived and worked.", {hours:"9:00–17:00 · ¥400 (~£2.05)"}),
@@ -941,7 +974,7 @@ const days = [
     <span class="badge tok">TRAVEL DAY</span>
   `, [
     {fixed: transitBlock("Train", [
-      { from:{code:"KANAZAWA", time:"10:05"}, to:{code:"TOKYO", time:"12:36"}, train:"Kagayaki 508", dur:"2h 31m" }
+      { from:{code:"KANAZAWA", time:"10:05"}, to:{code:"TOKYO", time:"12:36"}, train:"Kagayaki 508", dur:"2h 31m", refId:"d14-kanazawa-tokyo" }
     ])},
     {fixed: tipBlock("Beyond this point", [
       "The source plan doesn't yet cover onward travel or a flight home from here — nothing invented in its place."

@@ -414,12 +414,26 @@
   .meta-row{
     display:flex;
     justify-content:space-between;
+    align-items:center;
     font-size:14px;
     color:var(--text-dim);
     padding-top:10px;
     border-top:1px solid var(--line);
     margin-top:10px;
   }
+  .ref-input{
+    width:90px;
+    flex-shrink:0;
+    padding:4px 8px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--surface-hi);
+    color:var(--text);
+    font-family:inherit;
+    font-size:12px;
+    text-align:center;
+  }
+  .ref-input::placeholder{ color:var(--text-faint); }
 
   .hotel-name{
     font-family:'Fraunces', serif;
@@ -852,6 +866,23 @@ function pin(query){
   return `<a class="maplink" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}" target="_blank" rel="noopener" aria-label="Open in Google Maps">${PIN_SVG}</a>`;
 }
 
+// ---- Flight booking references (per traveller, persisted) ----
+function getFlightRef(flightId){
+  let refs = {};
+  try { refs = JSON.parse(localStorage.getItem('tripFlightRefs') || '{}'); } catch(e){}
+  return refs[flightId] || '';
+}
+function saveFlightRef(flightId, value){
+  let refs = {};
+  try { refs = JSON.parse(localStorage.getItem('tripFlightRefs') || '{}'); } catch(e){}
+  refs[flightId] = value;
+  try { localStorage.setItem('tripFlightRefs', JSON.stringify(refs)); } catch(e){}
+}
+function flightRefInputs(flightId){
+  const r = getFlightRef(flightId);
+  return `<input type="text" class="ref-input" placeholder="Ref" value="${r}" oninput="saveFlightRef('${flightId}', this.value)">`;
+}
+
 function activityCard(pid, when, titleHtml, bodyHtml, hoursText){
   const status = getStatus(pid);
   const dimClass = status !== 'default' ? ' is-dimmed' : '';
@@ -887,7 +918,7 @@ const days = [
           <div class="mid"><div class="line"></div><div class="dur">3h 15m · direct</div></div>
           <div class="pt"><div class="code">OTP</div><div class="time">15:05</div><div class="tz">EET · UTC+2</div></div>
         </div>
-        <div class="meta-row"><span>British Airways · BA874</span><span>Ref: YCLF6E</span></div>
+        <div class="meta-row"><span>British Airways · BA874</span>${flightRefInputs('lhr-otp')}</div>
       </div>`,
       `<div class="block block--hotel">
         <div class="block-label">Stay</div>
@@ -959,7 +990,7 @@ const days = [
           <div class="mid"><div class="line"></div><div class="dur">1h 15m · direct</div></div>
           <div class="pt"><div class="code">SOF</div><div class="time">19:30</div><div class="tz">EET · UTC+2</div></div>
         </div>
-        <div class="meta-row"><span>Tarom · RO297</span><span></span></div>
+        <div class="meta-row"><span>Tarom · RO297</span>${flightRefInputs('otp-sof')}</div>
       </div>`,
       `<div class="block block--hotel">
         <div class="block-label">Stay</div>
@@ -1026,7 +1057,7 @@ const days = [
           <div class="mid"><div class="line"></div><div class="dur">3h 25m · direct</div></div>
           <div class="pt"><div class="code">LHR</div><div class="time">21:10</div><div class="tz">GMT</div></div>
         </div>
-        <div class="meta-row"><span>British Airways · BA893</span><span>Ref: ZJV578</span></div>
+        <div class="meta-row"><span>British Airways · BA893</span>${flightRefInputs('sof-lhr')}</div>
       </div>`,
       `<div class="block">
         <div class="block-label">Hotel → airport</div>
