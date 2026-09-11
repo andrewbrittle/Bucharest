@@ -1277,8 +1277,8 @@ function selectDay(id){
   panel.innerHTML = `
     ${d.render()}
     ${quickAddCards.length ? `<div class="section-label">Added</div>${quickAddCards.join('')}` : ''}
-    ${renderNotesBox(id)}
     ${renderQuickAddBox(id)}
+    ${renderNotesBox(id)}
     <div class="navrow">
       <button class="navbtn ${prev ? '' : 'hidden'}" onclick="selectDay(${id-1})"><span>← Previous</span>${prev ? prev.weekday : ''}</button>
       <button class="navbtn next ${next ? '' : 'hidden'}" onclick="selectDay(${id+1})"><span>Next →</span>${next ? next.weekday : ''}</button>
